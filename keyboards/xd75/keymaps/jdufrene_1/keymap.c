@@ -35,8 +35,8 @@ bool is_linux = false; // default to windows
 #define KC_CAD   LALT(LCTL(KC_DEL)) // ctrl + atl + del
 #define ALTTAB   LALT(KC_TAB)       // alt + tab
 #define CTLTAB   LCTL(KC_TAB)       // ctrl + tab
-#define CTL_PGDN LCTL(KC_PGDN)      // back one tab
-#define CTL_PGUP LCTL(KC_PGUP)      // forward one tab
+#define CTLPGDN  LCTL(KC_PGDN)      // back one tab
+#define CTLPGUP  LCTL(KC_PGUP)      // forward one tab
 #define SAVE     LCTL(KC_S)         // ctrl + S = save
 #define CUT      LCTL(KC_X)         // ctrl + X = cut
 #define COPY     LCTL(KC_C)         // ctrl + C = copy
@@ -61,6 +61,8 @@ bool is_linux = false; // default to windows
 #define CTL_F2   LCTL(KC_F2)        // vs code : replace all word
 #define CTLK     LCTL(S(KC_K))      // ctrl + K = delete line
 #define EXPAND   LCTL(LALT(FR_A))   // vs code custom: Expand Braket Seletion
+#define PRVMAT   LCTL(LALT(KC_D))   // vs code custom: Previous match
+#define TEAMUTE  LCTL(S(FR_M))      // ms team: mute
 #define COMPOSE  X_RGUI             // linux compose
 // nano shortcut
 #define NCUT     LCTL(KC_K)         // nano cut
@@ -84,6 +86,8 @@ enum {
     TD5,
     TD6,
     TD7,
+    TD8,
+    TD9,
 };
 
 // Tap Dance Definitions
@@ -96,14 +100,18 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [TD5] = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
     [TD6] = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
     [TD7] = ACTION_TAP_DANCE_DOUBLE(ALTTAB, CTLTAB),
+    [TD8] = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
+    [TD9] = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
 };
 #define EQF12  TD(TD1) // = -> F12
-#define ALTALL TD(TD2) // alt -> select all
-#define UNREDO TD(TD3) // undo -> redo
+#define ALTALL TD(TD2) // alt     -> select all
+#define UNREDO TD(TD3) // undo    -> redo
 #define REFRSH TD(TD4) // refresh -> hard refresh
 #define NCTAB  TD(TD5) // new tab -> close tab
-#define PPASTE TD(TD6) // new tab -> close tab
+#define PPASTE TD(TD6) // ctrl v  -> mouse scroll wheel button
 #define ACTAB  TD(TD7) // alt tab -> ctrl tab
+#define TCTLD  TD(TD8) // ctrl d  -> ctrl alt d
+#define SFTCAP TD(TD9) // shift   -> all caps
 
 // TODO
 // browser back <-> forward (mouse button)
@@ -297,7 +305,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB  , FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    , KC_BSPC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , FR_CIRC , FR_DLR  , KC_PGUP ,
     SFT     , FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    , KC_ENT  , KC_H    , KC_J    , KC_K    , KC_L    , FR_M    , FR_UGRV , FR_ASTR , KC_PGDN ,
     KC_LSFT , FR_W    , KC_X    , KC_C    , KC_V    , KC_B    , KC_ENT  , KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM , KC_HOME , KC_UP   , KC_END  ,
-    KC_LCTL , KC_LGUI , KC_LALT , NUM     , FNTNB   , FNTN    , KC_SPC  , KC_LSFT , PROGSPC , PROGSPC , LANG    , RAND    , KC_LEFT , KC_DOWN , KC_RIGHT
+    KC_LCTL , KC_LGUI , KC_LALT , NUM     , FNTNB   , FNTN    , KC_SPC  , SFTCAP  , PROGSPC , PROGSPC , LANG    , RAND    , KC_LEFT , KC_DOWN , KC_RIGHT
   ),
 
 /* SHIFT LAYER
@@ -317,8 +325,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Shift Layer
   [_SFT] = LAYOUT_ortho_5x15( /* CUSTOM AZERTY */
     ________, FR_1    , FR_2    , FR_3    , FR_4    , FR_5    , ________, FR_6    , FR_7    , FR_8    , FR_9    , FR_0    , ___XX___, FR_PLUS , ________,
-    ________, S(FR_A) , S(FR_Z) , S(KC_E) , S(KC_R) , S(KC_T) , KC_WBAK , S(KC_Y) , S(KC_U) , S(KC_I) , S(KC_O) , S(KC_P) , FR_UMLT , ___XX___, CTL_PGUP,
-    ________, S(FR_Q) , S(KC_S) , S(KC_D) , S(KC_F) , S(KC_G) , KC_WFWD , S(KC_H) , S(KC_J) , S(KC_K) , S(KC_L) , S(FR_M) , FR_PERC , ___XX___, CTL_PGDN,
+    ________, S(FR_A) , S(FR_Z) , S(KC_E) , S(KC_R) , S(KC_T) , KC_WBAK , S(KC_Y) , S(KC_U) , S(KC_I) , S(KC_O) , S(KC_P) , FR_UMLT , ___XX___, CTLPGUP,
+    ________, S(FR_Q) , S(KC_S) , S(KC_D) , S(KC_F) , S(KC_G) , KC_WFWD , S(KC_H) , S(KC_J) , S(KC_K) , S(KC_L) , S(FR_M) , FR_PERC , ___XX___, CTLPGDN,
     ___XX___, S(FR_W) , S(KC_X) , S(KC_C) , S(KC_V) , S(KC_B) , KC_WREF , S(KC_N) , FR_QUES , FR_DOT  , FR_SLSH , ___XX___, ________, ________, ________,
     KC_RCTL , ________, ________, ________, KC_BSPC , KC_BSPC , KC_WSTP , KC_ENT  , KC_ENT  , ________, ________, ________, ________, ________, ________
   ),
@@ -338,11 +346,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
   [_NUM] = LAYOUT_ortho_5x15( /* NUMPAD */
-    ________, ___XX___, ___XX___, ___XX___, ___XX___, ___XX___, ________, ___XX___, ___XX___, FR_SLSH , FR_ASTR , ___XX___, KC_PSLS , KC_PAST , KC_PMNS ,
-    ________, EXPAND  , PROXY1  , PROXY2  , USER    , PASWD   , ________, ___XX___, FR_7    , FR_8    , FR_9    , FR_PLUS , KC_P7   , KC_P8   , KC_P9   ,
-    ________, CTLK    , NCUT    , NCOPY   , NPASTE  , SPACE4  , ________, KC_ENT  , FR_4    , FR_5    , FR_6    , FR_MINS , KC_P4   , KC_P5   , KC_P6   ,
-    ________, ___XX___, ___XX___, ___XX___, FR_DOT  , FR_COMM , ________, ___XX___, FR_1    , FR_2    , FR_3    , FR_EQL  , KC_P1   , KC_P2   , KC_P3   ,
-    ________, ________, ________, ________, ___XX___, ________, ________, ________, FR_0    , ________, ________, KC_ENT  , KC_P0   , KC_PPLS , KC_PENT
+    ________, ___XX___, ___XX___, ___XX___, ___XX___, ___XX___, ________, ___XX___, ___XX___, FR_SLSH , FR_ASTR , ___XX___, ___XX___, ___XX___, ___XX___,
+    ________, EXPAND  , PROXY1  , PROXY2  , USER    , PASWD   , ________, ___XX___, FR_7    , FR_8    , FR_9    , ___XX___, ___XX___, ___XX___, ___XX___,
+    ________, CTLK    , NCUT    , NCOPY   , NPASTE  , SPACE4  , ________, KC_ENT  , FR_4    , FR_5    , FR_6    , KC_BSPC , ___XX___, ___XX___, ___XX___,
+    ________, ___XX___, ___XX___, ___XX___, FR_DOT  , FR_COMM , ________, ___XX___, FR_1    , FR_2    , FR_3    , KC_DEL  , ___XX___, ___XX___, ___XX___,
+    ________, ________, ________, ________, ___XX___, ________, ________, KC_LSFT , FR_0    , KC_SPC  , ________, ___XX___, ___XX___, ___XX___, ___XX___
   ),
 
 /* ,____1___, ____2___, ____3___, ____4___, ____5___, ____6___, ____7___, ____8___, ____9___, ___10___, ___11___, ___12___, ___13___, ___14___, ___15___ */
@@ -372,7 +380,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* FUNCTION LAYER
  * .-----------------------------------------------------------------------------------------------------------------------------------------------------.
- * |   ¤    |         | REDO    |         | CLSWIN  | REFRSH  |    ¤    | F6      |         |         |         |         | F11     | F12     | PRINT SCR|
+ * |   ¤    |         | REDO    | F2      | CLSWIN  | REFRSH  |    ¤    | F6      |         |         |         |         | F11     | F12     | PRINT SCR|
  * |--------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+----------|
  * |   ¤    | ALT     | UNDO    | DEL     | ENT     | NEWTAB  |    ¤    |         | HOME    | UP      | END     | MENU    |         |         | BRIGHT UP|
  * |--------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+----------|
@@ -385,10 +393,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
   [_FNTN] = LAYOUT_ortho_5x15( /* FUNCTION */
-    ________, ACTAB   , REDO    , ___XX___, CLSWIN  , REFRSH  , KC_CAD  , KC_F6   , ___XX___, ___XX___, ___XX___, ___XX___, KC_F11  , KC_F12  , KC_PSCR ,
+    ________, ACTAB   , REDO    , KC_F2   , CLSWIN  , REFRSH  , KC_CAD  , KC_F6   , ___XX___, ___XX___, ___XX___, ___XX___, KC_F11  , KC_F12  , KC_PSCR ,
     ________, ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   , ________, ___XX___, KC_HOME , KC_UP   , KC_END  , KC_APP  , KC_PGUP , ___XX___, KC_BRIU ,
-    KC_LSFT , KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  , ________, KC_ENT  , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC , KC_PGDN , ___XX___, KC_BRID ,
-    ________, COMMENT , SAVE    , CTLD    , FIND    , REPLACE , ________, DCLICK  , FR_QUES , FR_DOT  , FR_SLSH , KC_DEL  , KC_MPLY , KC_VOLU , KC_MUTE ,
+    KC_TAB  , KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  , ________, KC_ENT  , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC , KC_PGDN , ___XX___, KC_BRID ,
+    ________, COMMENT , SAVE    , TCTLD   , FIND    , REPLACE , ________, SELECTW , FR_QUES , FR_DOT  , FR_SLSH , KC_DEL  , KC_MPLY , KC_VOLU , KC_MUTE ,
     ________, ________, ________, PALETTE , ________, CTL_F2  , ________, KC_LSFT , KC_LSFT , KC_SPC  , KC_RWIN , ___XX___, KC_MPRV , KC_VOLD , KC_MNXT
   ),
 
