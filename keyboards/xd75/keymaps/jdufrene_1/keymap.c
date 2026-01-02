@@ -68,7 +68,8 @@ bool is_linux = false; // default to windows
 #define NCUT     LCTL(KC_K)         // nano cut
 #define NCOPY    LALT(FR_6)         // nano copy
 #define NPASTE   LCTL(KC_U)         // nano paste
-
+// ^
+#define FR_CCIRC ALGR(FR_CCED)
 // 
 #define ________ KC_TRNS
 #define ___XX___ KC_NO
@@ -301,7 +302,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /*  ,____1___, ____2___, ____3___, ____4___, ____5___, ____6___, ____7___, ____8___, ____9___, ___10___, ___11___, ___12___, ___13___, ___14___, ___15___,*/
 
   [_AZ] = LAYOUT_ortho_5x15( /* CUSTOM AZERTY */
-    KC_ESC  , FR_AMP  , FR_EACU , FR_QUOT , FR_APOS , FR_LPRN , KC_DEL  , FR_MINS , FR_EGRV , FR_UNDS , FR_CCED , FR_AGRV , FR_RPRN , EQF12   , TOG_OS  ,
+    KC_ESC  , FR_AMPR , FR_EACU , FR_QUOT , FR_QUOT , FR_LPRN , KC_DEL  , FR_MINS , FR_EGRV , FR_UNDS , FR_CCED , FR_AGRV , FR_RPRN , EQF12   , TOG_OS  ,
     KC_TAB  , FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    , KC_BSPC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , FR_CIRC , FR_DLR  , KC_PGUP ,
     SFT     , FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    , KC_ENT  , KC_H    , KC_J    , KC_K    , KC_L    , FR_M    , FR_UGRV , FR_ASTR , KC_PGDN ,
     KC_LSFT , FR_W    , KC_X    , KC_C    , KC_V    , KC_B    , KC_ENT  , KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM , KC_HOME , KC_UP   , KC_END  ,
@@ -325,7 +326,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Shift Layer
   [_SFT] = LAYOUT_ortho_5x15( /* CUSTOM AZERTY */
     ________, FR_1    , FR_2    , FR_3    , FR_4    , FR_5    , ________, FR_6    , FR_7    , FR_8    , FR_9    , FR_0    , ___XX___, FR_PLUS , ________,
-    ________, S(FR_A) , S(FR_Z) , S(KC_E) , S(KC_R) , S(KC_T) , KC_WBAK , S(KC_Y) , S(KC_U) , S(KC_I) , S(KC_O) , S(KC_P) , FR_UMLT , ___XX___, CTLPGUP,
+    ________, S(FR_A) , S(FR_Z) , S(KC_E) , S(KC_R) , S(KC_T) , KC_WBAK , S(KC_Y) , S(KC_U) , S(KC_I) , S(KC_O) , S(KC_P) , FR_DIAE , ___XX___, CTLPGUP,
     ________, S(FR_Q) , S(KC_S) , S(KC_D) , S(KC_F) , S(KC_G) , KC_WFWD , S(KC_H) , S(KC_J) , S(KC_K) , S(KC_L) , S(FR_M) , FR_PERC , ___XX___, CTLPGDN,
     ___XX___, S(FR_W) , S(KC_X) , S(KC_C) , S(KC_V) , S(KC_B) , KC_WREF , S(KC_N) , FR_QUES , FR_DOT  , FR_SLSH , ___XX___, ________, ________, ________,
     KC_RCTL , ________, ________, ________, KC_BSPC , KC_BSPC , KC_WSTP , KC_ENT  , KC_ENT  , ________, ________, ________, ________, ________, ________
@@ -369,9 +370,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * '------------------------------------------------------------------------------------------------------------------------------------------------------'
  */ 
   [_PROG] = LAYOUT_ortho_5x15( /* PROG */
-    ________, FR_EURO , FR_TILD , FR_HASH , FR_LCBR , FR_LBRC , ________, FR_PIPE , FR_GRV  , FR_BSLS , FR_CCIRC, FR_AT   , FR_RBRC , FR_RCBR , FR_OVRR ,
-    ________, FR_AMP  , FR_TILD , FR_QUOT , FR_APOS , FR_GRV  , ________, FR_MINS , FR_UNDS , FR_PIPE , FR_DLR  , FR_PERC , FR_HASH , ________, ___XX___,
-    ________, FR_LESS , FR_LBRC , FR_LCBR , FR_LPRN , FR_EQL  , ________, FR_PLUS , FR_RPRN , FR_RCBR , FR_RBRC , FR_GRTR , FR_MINS , ________, ___XX___,
+    ________, FR_EURO , FR_TILD , FR_HASH , FR_LCBR , FR_LBRC , ________, FR_PIPE , FR_GRV  , FR_BSLS , FR_CCIRC, FR_AT   , FR_RBRC , FR_RCBR , FR_DEG  ,
+    ________, FR_AMPR , FR_TILD , FR_QUOT , FR_QUOT , FR_GRV  , ________, FR_MINS , FR_UNDS , FR_PIPE , FR_DLR  , FR_PERC , FR_HASH , ________, ___XX___,
+    ________, FR_LABK , FR_LBRC , FR_LCBR , FR_LPRN , FR_EQL  , ________, FR_PLUS , FR_RPRN , FR_RCBR , FR_RBRC , FR_RABK , FR_MINS , ________, ___XX___,
     ________, ___XX___, FR_ASTR , FR_CCIRC, FR_HASH , FR_SLSH , ________, FR_BSLS , ________, ________, ________, ________, ___XX___, ___XX___, ___XX___,
     ________, ________, ________, ___XX___, ___XX___, ________, ________, ________, ________, ________, ___XX___, ___XX___, ___XX___, ___XX___, ___XX___
   ),
