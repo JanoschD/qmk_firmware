@@ -1,5 +1,7 @@
 // qmk compile -kb=sporewoh/keezyboost40 -km=jan
+// qmk flash -kb=sporewoh/keezyboost40 -km=jan
 
+#include "print.h"
 #include QMK_KEYBOARD_H
 #include "keymap_french.h"
 #include "layer_names.h"
@@ -17,12 +19,15 @@ bool is_french = true; // default to french
 #define COPY     LCTL(KC_C)           // ctrl + C = copy
 #define PASTE    LCTL(KC_V)           // ctrl + V = paste
 #define UNDO     LCTL(FR_Z)           // ctrl + Z = undo
+#define UNDOE    LCTL(KC_Z)           // ctrl + Z = undo (for english)
 #define REDO     LCTL(KC_Y)           // ctrl + Y = redo
 #define NEWTAB   LCTL(KC_T)           // ctrl + T = new tab
 #define CLSTAB   LCTL(FR_W)           // ctrl + W = close tab
+#define CLSTABE  LCTL(KC_W)           // ctrl + W = close tab (for english)
 #define FIND     LCTL(KC_F)           // ctrl + F = find
 #define REPLACE  LCTL(KC_H)           // ctrl + H = replace
 #define SELECTA  LCTL(FR_A)           // ctrl + A = select all
+#define SELECTAE LCTL(KC_A)           // ctrl + A = select all (for english)
 #define CLOSWIN  LALT(KC_F4)          // close window
 #define CLOSTAB  LCTL(KC_F4)          // close tab
 #define HREFRSH  LCTL(KC_F5)          // hard refresh
@@ -35,9 +40,13 @@ bool is_french = true; // default to french
 // vs code shortcut
 #define CTLD     LCTL(KC_D)           // ctrl + D
 #define COMLIN   LCTL(FR_SLSH)        // ctrl + / = comment line (linux)
+#define COMLINE  LCTL(KC_SLSH)        // ctrl + / = comment line (linux for english)
 #define COMWIN   LCTL(FR_COLN)        // ctrl + : = comment line (windows)
+#define COMWINE  LCTL(KC_COLN)        // ctrl + : = comment line (windows for english)
 #define COMBLIN  LCTL(S(FR_A))        // ctrl + A = comment block (linux)
+#define COMBLINE LCTL(S(KC_A))        // ctrl + A = comment block (linux for english)
 #define COMBWIN  S(LALT(FR_A))        // shift + alt + a = comment block (windows)
+#define COMBWINE S(LALT(KC_A))        // shift + alt + a = comment block (windows for english)
 #define CTLK     LCTL(S(KC_K))        // ctrl + K = delete line
 #define CTL_F2   LCTL(KC_F2)          // vs code : replace all word
 #define EXPAND   S(LALT(KC_RIGHT))    // vs code custom: Expand Seletion
@@ -54,6 +63,7 @@ bool is_french = true; // default to french
 // nano shortcut
 #define NCUT     LCTL(KC_K)         // nano cut
 #define NCOPY    LALT(FR_6)         // nano copy
+#define NCOPYE   LALT(KC_6)         // nano copy (for english)
 #define NPASTE   LCTL(KC_U)         // nano paste
 
 // ^
@@ -63,6 +73,7 @@ bool is_french = true; // default to french
 #define ________ KC_TRNS
 #define ___XX___ KC_NO
 
+//#define MODS_SHIFT_MASK (MOD_BIT(KC_LSFT)|MOD_BIT(KC_RSFT))
 
 
 // Tap Dance Declarations
@@ -78,36 +89,44 @@ enum {
     TD8,
     TD9,
     TD10,
-    TD11
 };
 
-// Tap Dance Definitions
 tap_dance_action_t tap_dance_actions[] = {
     // simple tap dance
-    [TD1]  = ACTION_TAP_DANCE_DOUBLE(FR_EQL, KC_F12),
-    [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTA),
-    [TD3]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
-    [TD4]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
-    [TD5]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
-    [TD6]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
-    [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
-    [TD8]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
-    [TD9]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
-    [TD10] = ACTION_TAP_DANCE_DOUBLE(COMLIN, COMBLIN),
-    [TD11] = ACTION_TAP_DANCE_DOUBLE(COMWIN, COMBWIN),
+    [TD1]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTA),
+    [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
+    [TD3]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
+    [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
+    [TD5]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
+    [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
+    [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
+    [TD8]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
+    [TD9]  = ACTION_TAP_DANCE_DOUBLE(COMLIN, COMBLIN),
+    [TD10] = ACTION_TAP_DANCE_DOUBLE(COMWIN, COMBWIN),
+    // english tap dance
+    [TD11]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
+    [TD12]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
+    [TD13]  = ACTION_TAP_DANCE_DOUBLE(COMLINE, COMBLINE),
+    [TD14]  = ACTION_TAP_DANCE_DOUBLE(COMWINE, COMBWINE),
 };
-#define EQF12  TD(TD1) // = -> F12
-#define ALTALL TD(TD2) // alt     -> select all
-#define REFRSH TD(TD3) // refresh -> hard refresh
-#define NCTAB  TD(TD4) // new tab -> close tab
-#define PPASTE TD(TD5) // ctrl v  -> mouse scroll wheel button
-#define TCTLD  TD(TD6) // ctrl d  -> ctrl alt d
-#define SFTCAP TD(TD7) // shift   -> all caps
-#define ESCAD  TD(TD8) // esc     -> ctrl alt del
-#define CLOSTW TD(TD9) // close tab -> close window
-#define COMML  TD(TD10) // comment line -> comment block (linux)
-#define COMMW  TD(TD11) // comment line -> comment block (windows)
 
+#define ALTALL   TD(TD1) // alt           -> select all
+#define REFRSH   TD(TD2) // refresh       -> hard refresh
+#define NCTAB    TD(TD3) // new tab       -> close tab
+#define PPASTE   TD(TD4) // ctrl v        -> mouse scroll wheel button
+#define TCTLD    TD(TD5) // ctrl d        -> ctrl alt d
+#define SFTCAP   TD(TD6) // shift         -> all caps
+#define ESCAD    TD(TD7) // esc           -> ctrl alt del
+#define CLOSTW   TD(TD8) // close tab     -> close window
+#define COMML    TD(TD9) // comment line  -> comment block (linux)
+#define COMMW    TD(TD10) // comment line -> comment block (windows)
+// english versions
+#define ALTALLE  TD(TD11) // alt          -> select all
+#define NCTABE   TD(TD12) // new tab      -> close tab
+#define COMMLE   TD(TD13) // comment line -> comment block (linux)
+#define COMMWE   TD(TD14) // comment line -> comment block (windows)
+
+// Unicode characters
 enum unicode_names {
     U_AACUTE_LO,
     U_AACUTE_HI,
@@ -224,13 +243,12 @@ enum custom_keycodes {
   TOG_OS = SAFE_RANGE,
   TOG_LANG,
   SPACE4,
-  DYN_SYM
 };
 
 #define SFT      MO(_SFT)
 #define NUM      LT(_NUM, KC_SPC)
 // #define PROG     MO(_SYMB)
-// #define SYMSPC   LT(_SYMB, KC_SPC)
+#define SYMSPC   LT(_SYMB, KC_SPC)
 #define FNTN     LT(_FNTN, KC_SPC)
 #define FNTNB    LT(_FNTN, KC_BSPC)
 #define LANG     MO(_LANG)
@@ -238,11 +256,6 @@ enum custom_keycodes {
 /*
 TODO:
   
-  EQF12
-  KC_RCTL
-
-  QWERTY / Language switcher
-  LGUI + arrow for window management?
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -282,7 +295,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_A    , KC_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
     KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , KC_M    ,
     KC_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , KC_COMM , KC_SCLN , KC_COLN , KC_EXLM ,
-    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , DYN_SYM , LANG    , TOG_OS  , TOG_LANG
+    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
   ),
 
   /* SHIFT LAYER
@@ -307,20 +320,27 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   /* NUMPAD
   * .-----------------------------------------------------------------------------------------------------.
-  * | EXPAND  | REDO    |PRINT SCR| SFTENT  |         |||         | 7       | 8       | 9       |         |
+  * | EXPAND  | REDO    |PRINT SCR| SFTENT  |         |||         | 7       | 8       | 9       | REBOOT  |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | CTLK    | NCUT    | NCOPY   | NPASTE  | SPACE4  |||         | 4       | 5       | 6       | .       |
+  * | COMMENT | NCUT    | NCOPY   | NPASTE  | SPACE4  |||         | 4       | 5       | 6       | .       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | COMMENT | TERM    | BKTOG   | BKPRV   | BKNEXT  |||         | 1       | 2       | 3       | ,       |
+  * | CTLK    | TERM    | BKTOG   | BKPRV   | BKNEXT  |||         | 1       | 2       | 3       | ,       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * |    ¤    |    ¤    | XXXXXXX |         |   ¤     |||    ¤    | 0       |         |         | FLASH   |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_NUM] = LAYOUT_ortho_4x10( /* NUMPAD */
-    EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, FR_7    , FR_8    , FR_9    , ___XX___,
-    CTLK    , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
-    COMML   , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
+    EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
+    COMML   , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
+    CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
     ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
+  ),
+
+  [_NUM_EN] = LAYOUT_ortho_4x10( /* NUMPAD */
+    EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, KC_7    , KC_8    , KC_9    , QK_RBT  ,
+    COMMLE  , NCUT    , NCOPYE  , NPASTE  , SPACE4  ,    ___XX___, KC_4    , KC_5    , KC_6    , KC_DOT  ,
+    CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
+    ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , KC_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   /* SYMBOL LAYER
@@ -377,6 +397,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , ___XX___, KC_RCTL
   ),
 
+  [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
+    ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
+    KC_LCTL , CUT     , COPYE   , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
+    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , ___XX___, REFRSH  , KC_F11  , KC_F12  ,
+    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , ___XX___, KC_RCTL
+  ),
+
   /* LANGUAGE LAYER
   * .-----------------------------------------------------------------------------------------------------.
   * | á       | ž       | ě       | ř       | ť       ||| ý       | ú       | í       | ó       |         |
@@ -398,18 +425,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool process_lang_key(keyrecord_t *record, uint16_t en_key, uint16_t fr_key) {
     uint16_t key_to_process = is_french ? fr_key : en_key;
+    uprintf("Processing key: %s as %s\n", get_keycode_string(en_key), get_keycode_string(key_to_process));
     if (record->event.pressed) {
-        register_code(key_to_process);
+        register_code16(key_to_process);
     } else {
-        unregister_code(key_to_process);
+        unregister_code16(key_to_process);
     }
     return false;
 }
 
+bool scln_was_shifted = false;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-  //static bool bspcdel_mods = false;
-  //static bool spcent_mods = false;
+#ifdef CONSOLE_ENABLE
+  uprintf("KL: kc: 0x%04X (%s), col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, get_keycode_string(keycode), record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif 
+
+  const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
 
   switch (keycode) {
     case TOG_OS:
@@ -426,27 +459,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     case TOG_LANG:
       if (record->event.pressed) {
-          // Toggle the language mode
           is_french = !is_french;
-          // if (is_french) {
-          //     set_single_default_layer(_EN);
-          // } else {
-          //     set_single_default_layer(_FR);
-          // }
       }
       break;
     case SPACE4:
-      // double click + paste
       if (record->event.pressed) {
-        // on keydown
         SEND_STRING("    ");
       }
       break;
+
+    case UNDO:
+      uprintf("UNDO kc: %s\n", get_keycode_string(keycode));
+      return process_lang_key(record, LCTL(KC_Z), LCTL(FR_Z));
     
     case KC_A:
       return process_lang_key(record, KC_A, FR_A);
     
     case KC_Z:
+      uprintf("KC_Z kc: %s\n", get_keycode_string(keycode));
       return process_lang_key(record, KC_Z, FR_Z);
 
     case KC_Q:
@@ -458,44 +488,150 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_M:
       return process_lang_key(record, KC_M, FR_M);
 
-    case KC_COMM:
-      return process_lang_key(record, KC_COMM, FR_COMM);
-
-    case KC_SCLN:
-      return process_lang_key(record, KC_SCLN, FR_SCLN);
-
-    case KC_COLN:
-      return process_lang_key(record, KC_COLN, FR_COLN);
+    // case EXLM:
+    //   return process_lang_key(record, KC_EXLM, FR_EXLM);
 
     case KC_EXLM:
-      return process_lang_key(record, S(KC_1), FR_EXLM);
-
-    case KC_DOT:
-      return process_lang_key(record, KC_DOT, FR_DOT);
-
-    case DYN_SYM:
       if (record->event.pressed) {
-        // Activate layer on press
-        if (is_french) {
-            layer_on(_SYMB);
+        // on keydown
+        if (shifted) {
+          register_code16(KC_NO);
         } else {
-            layer_on(_SYMB_EN);
+          if (is_french) {
+            register_code16(FR_EXLM);
+          } else {
+            register_code16(KC_EXLM);
+          }
         }
-      } else { // On release
-        // Deactivate layer
-        if (is_french) {
-            layer_off(_SYMB);
+      } else {
+        // on keyup
+        if (shifted) {
+          unregister_code16(KC_NO);
         } else {
-            layer_off(_SYMB_EN);
-        }
-        // If it was a tap, send space
-        if (record->tap.count > 0) {
-          tap_code(KC_SPC);
+          if (is_french) {
+            unregister_code16(FR_EXLM);
+          } else {
+            unregister_code16(KC_EXLM);
+          }
         }
       }
       return false;
+
+    case KC_COLN:
+      if (record->event.pressed) {
+        // on keydown
+        if (shifted) {
+          register_code16(KC_NO);
+        } else {
+          if (is_french) {
+            register_code16(FR_COLN);
+          } else {
+            register_code16(KC_COLN);
+          }
+        }
+      } else {
+        // on keyup
+        if (shifted) {
+          unregister_code16(KC_NO);
+        } else {
+          if (is_french) {
+            unregister_code16(FR_COLN);
+          } else {
+            unregister_code16(KC_COLN);
+          }
+        }
+      }
+      return false;
+    
+    case KC_SCLN:
+      if (record->event.pressed) {
+        // on keydown - store the shift state
+        scln_was_shifted = shifted;
+        if (shifted) {
+          if (is_french) {
+            register_code16(FR_DOT);
+          } else {
+            unregister_code(KC_LSFT);
+            register_code16(KC_DOT);
+          }
+        } else {
+          if (is_french) {
+            register_code16(FR_SCLN);
+          } else {
+            register_code16(KC_SCLN);
+          }
+        }
+      } else {
+        // on keyup - use the stored shift state
+        if (scln_was_shifted) {
+          if (is_french) {
+            unregister_code16(FR_DOT);
+          } else {
+            unregister_code16(KC_DOT);
+            register_code16(KC_LSFT);
+          }
+        } else {
+          if (is_french) {
+            unregister_code16(FR_SCLN);
+          } else {
+            unregister_code16(KC_SCLN);
+          }
+        }
+      }
+      return false;
+
+    case KC_COMM:
+      if (record->event.pressed) {
+        // on keydown
+        if (shifted) {
+          if (is_french) {
+            register_code16(FR_QUES);
+          } else {
+            register_code16(KC_SLSH); // S(/) = ?
+          }
+        } else {
+          if (is_french) {
+            register_code16(FR_COMM);
+          } else {
+            register_code16(KC_COMM);
+          }
+        }
+      } else {
+        // on keyup
+        if (shifted) {
+          if (is_french) {
+            unregister_code16(FR_QUES);
+          } else {
+            unregister_code16(KC_SLSH);
+          }
+        } else {
+          if (is_french) {
+            unregister_code16(FR_COMM);
+          } else {
+            unregister_code16(KC_COMM);
+          }
+        }
+      }
+      return false;
+
+    // case KC_DOT:
+    //   return process_lang_key(record, KC_DOT, FR_DOT);
+
+
   }
   return true;
+}
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    if (layer_state_cmp(state, _SYMB)) {
+      if (!is_french) {
+        state &= ~(1UL << _SYMB);    // Turn OFF French Symbol layer
+        state |= (1UL << _SYMB_EN);  // Turn ON English Symbol layer
+      }
+    } else {
+      state &= ~(1UL << _SYMB_EN);   // Turn OFF English Symbol layer
+    }
+    return state;
 }
 
 void matrix_init_user(void) {
@@ -504,7 +640,9 @@ void matrix_init_user(void) {
 }
 
 void keyboard_post_init_user(void) {
-  // default to win compose
+  debug_enable=true;
+  debug_matrix=true;
+  debug_keyboard=true;
   set_unicode_input_mode(UNICODE_MODE_WINDOWS);
   is_linux = false;
   is_french = true;
