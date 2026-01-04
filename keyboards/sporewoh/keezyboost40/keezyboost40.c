@@ -28,7 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "qp_comms.h"
 #include "qp_st77xx_opcodes.h"
 
-#include "iosevka11.qff.h"
+#include "thintel15.qff.c"
+
 
 #include "layer_names.h"
 
@@ -60,7 +61,7 @@ void ui_init(void) {
     // begin drawing space
     qp_rect(lcd, 0, 0, LCD_WIDTH, LCD_HEIGHT, HSV_BLACK, true);
 
-    font = qp_load_font_mem(font_iosevka11);
+    font = qp_load_font_mem(font_thintel15);
 }
 
 void keyboard_post_init_kb(void) {
@@ -79,7 +80,7 @@ void ui_task(void) {
     
     extern bool is_linux;
     extern bool is_french;
-    uint8_t current_layer = get_highest_layer(layer_state);
+    uint8_t current_layer = get_highest_layer(layer_state | default_layer_state);
     
     // Get current shift and caps lock states
     bool shift_pressed = get_mods() & MOD_MASK_SHIFT;
@@ -100,24 +101,42 @@ void ui_task(void) {
         return;  // Font not loaded, skip update
     }
 
+    // Calculate the maximum width of the labels to align the values.
+    int16_t value_x_pos = 20;
+    if (layer_changed || os_changed || shift_changed || caps_changed || lang_changed || !initialized) {
+        const char *labels[] = {"Layer:", "OS:", "Shift:", "Caps:", "Lang:"};
+        int16_t     max_width = 0;
+        for (uint8_t i = 0; i < 5; i++) {
+            int16_t w = qp_textwidth(font, labels[i]);
+            if (w > max_width) {
+                max_width = w;
+            }
+        }
+        value_x_pos += max_width + 5; // 5 pixels for spacing
+    }
+
     if (layer_changed || !initialized) {
         // Draw layer text
         static const char *text  = "Layer:";
-        int16_t width = qp_textwidth(font, text);
         qp_drawtext_recolor(lcd, 20, 140, font, text, HSV_RED, HSV_BLACK);
+        
+        // clear previous layer name
+        qp_rect(lcd, value_x_pos, 140, LCD_WIDTH - 1, 140 + font->line_height, HSV_BLACK, true);
 
         const char *layer_name;
         switch (current_layer) {
-            case _AZ:      layer_name = "AZERTY   "; break;
-            case _SFT:     layer_name = "SHIFT    "; break;
-            case _NUM:     layer_name = "NUMBER   "; break;
-            case _SYMB:    layer_name = "SYMBOL   "; break;
+            case _AZ:      layer_name = "AZERTY"; break;
+            case _AZ_EN:   layer_name = "AZERTY_EN"; break;
+            case _NUM:     layer_name = "NUMBER"; break;
+            case _NUM_EN:  layer_name = "NUMBER_EN"; break;
+            case _SYMB:    layer_name = "SYMBOL"; break;
             case _SYMB_EN: layer_name = "SYMBOL_EN"; break;
-            case _FNTN:    layer_name = "FUNCTION "; break;
-            case _LANG:    layer_name = "LANGUAGE "; break;
-            default:       layer_name = "_PANIC_  "; break;
+            case _FNTN:    layer_name = "FUNCTION"; break;
+            case _FNTN_EN: layer_name = "FUNCTION_EN"; break;
+            case _LANG:    layer_name = "LANGUAGE"; break;
+            default:       layer_name = "_PANIC_"; break;
         }
-        qp_drawtext_recolor(lcd, (20 + width), 140, font, layer_name, HSV_RED, HSV_BLACK);
+        qp_drawtext_recolor(lcd, value_x_pos, 140, font, layer_name, HSV_RED, HSV_BLACK);
         
         last_layer = current_layer;
     }
@@ -125,13 +144,14 @@ void ui_task(void) {
     if (os_changed || !initialized) {
         // Draw OS text
         static const char *os_text = "OS:";
-        int16_t os_width = qp_textwidth(font, os_text);
         qp_drawtext_recolor(lcd, 20, 120, font, os_text, HSV_RED, HSV_BLACK);
         
+        qp_rect(lcd, value_x_pos, 120, LCD_WIDTH - 1, 120 + font->line_height, HSV_BLACK, true);
+
         if (is_linux) {
-            qp_drawtext_recolor(lcd, (20 + os_width), 120, font, "Linux  ", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 120, font, "Linux", HSV_RED, HSV_BLACK);
         } else {
-            qp_drawtext_recolor(lcd, (20 + os_width), 120, font, "Windows", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 120, font, "Windows", HSV_RED, HSV_BLACK);
         }
         last_os_mode = is_linux;
     }
@@ -139,13 +159,12 @@ void ui_task(void) {
     if (shift_changed || !initialized) {
         // Draw Shift status
         static const char *shift_text = "Shift:";
-        int16_t shift_width = qp_textwidth(font, shift_text);
         qp_drawtext_recolor(lcd, 20, 100, font, shift_text, HSV_RED, HSV_BLACK);
         
         if (shift_pressed) {
-            qp_drawtext_recolor(lcd, (20 + shift_width), 100, font, "ON ", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 100, font, "ON", HSV_RED, HSV_BLACK);
         } else {
-            qp_drawtext_recolor(lcd, (20 + shift_width), 100, font, "OFF", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 100, font, "OFF", HSV_RED, HSV_BLACK);
         }
         last_shift_state = shift_pressed;
     }
@@ -153,13 +172,12 @@ void ui_task(void) {
     if (caps_changed || !initialized) {
         // Draw Caps Lock status
         static const char *caps_text = "Caps:";
-        int16_t caps_width = qp_textwidth(font, caps_text);
         qp_drawtext_recolor(lcd, 20, 80, font, caps_text, HSV_RED, HSV_BLACK);
         
         if (caps_locked) {
-            qp_drawtext_recolor(lcd, (20 + caps_width), 80, font, "ON ", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 80, font, "ON", HSV_RED, HSV_BLACK);
         } else {
-            qp_drawtext_recolor(lcd, (20 + caps_width), 80, font, "OFF", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 80, font, "OFF", HSV_RED, HSV_BLACK);
         }
         last_caps_state = caps_locked;
     }
@@ -167,13 +185,12 @@ void ui_task(void) {
     if (lang_changed || !initialized) {
         // Draw Language text
         static const char *lang_text = "Lang:";
-        int16_t lang_width = qp_textwidth(font, lang_text);
         qp_drawtext_recolor(lcd, 20, 60, font, lang_text, HSV_RED, HSV_BLACK);
         
         if (is_french) {
-            qp_drawtext_recolor(lcd, (20 + lang_width), 60, font, "French ", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 60, font, "French", HSV_RED, HSV_BLACK);
         } else {
-            qp_drawtext_recolor(lcd, (20 + lang_width), 60, font, "English", HSV_RED, HSV_BLACK);
+            qp_drawtext_recolor(lcd, value_x_pos, 60, font, "English", HSV_RED, HSV_BLACK);
         }
         last_lang_mode = is_french;
     }

@@ -73,10 +73,50 @@ bool is_french = true; // default to french
 #define ________ KC_TRNS
 #define ___XX___ KC_NO
 
-//#define MODS_SHIFT_MASK (MOD_BIT(KC_LSFT)|MOD_BIT(KC_RSFT))
 
 
 // Tap Dance Declarations
+void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
+    uprintf("Comment tap dance, count: %d\n", state->count);
+    uint16_t line_comment;
+    uint16_t block_comment;
+
+    if (is_linux) {
+        uprintf("Comment tap dance, linux\n");
+        line_comment = is_french ? COMLIN : COMLINE;
+        block_comment = is_french ? COMBLIN : COMBLINE;
+    } else {
+        uprintf("Comment tap dance, windows\n");
+        line_comment = is_french ? COMWIN : COMWINE;
+        block_comment = is_french ? COMBWIN : COMBWINE;
+    }
+
+    if (state->count == 1) {
+        uprintf("Comment tap dance, single tap\n");
+        // On single tap, register the line comment shortcut
+        register_code16(line_comment);
+    } else if (state->count == 2) {
+        uprintf("Comment tap dance, double tap\n");
+        // On double tap, register the block comment shortcut
+        // Unregister the line comment first to avoid conflicts
+        unregister_code16(line_comment);
+        register_code16(block_comment);
+    }
+}
+
+void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
+    uprint("Comment tap dance reset\n");
+    // Unregister all possible comment shortcuts on reset (key up)
+    unregister_code16(COMLIN);
+    unregister_code16(COMLINE);
+    unregister_code16(COMWIN);
+    unregister_code16(COMWINE);
+    unregister_code16(COMBLIN);
+    unregister_code16(COMBLINE);
+    unregister_code16(COMBWIN);
+    unregister_code16(COMBWINE);
+}
+
 // https://jayliu50.github.io/qmk-cheatsheet/
 enum {
     TD1 = 0,
@@ -89,6 +129,10 @@ enum {
     TD8,
     TD9,
     TD10,
+    TD11,
+    TD12,
+    TD13,
+    TD14
 };
 
 tap_dance_action_t tap_dance_actions[] = {
@@ -101,13 +145,14 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
     [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
     [TD8]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
-    [TD9]  = ACTION_TAP_DANCE_DOUBLE(COMLIN, COMBLIN),
-    [TD10] = ACTION_TAP_DANCE_DOUBLE(COMWIN, COMBWIN),
+    //[TD9]  = ACTION_TAP_DANCE_DOUBLE(COMLIN, COMBLIN),
+    //[TD10] = ACTION_TAP_DANCE_DOUBLE(COMWIN, COMBWIN),
     // english tap dance
-    [TD11]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
-    [TD12]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
-    [TD13]  = ACTION_TAP_DANCE_DOUBLE(COMLINE, COMBLINE),
-    [TD14]  = ACTION_TAP_DANCE_DOUBLE(COMWINE, COMBWINE),
+    [TD9]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
+    [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
+    //[TD13]  = ACTION_TAP_DANCE_DOUBLE(COMLINE, COMBLINE),
+    //[TD14]  = ACTION_TAP_DANCE_DOUBLE(COMWINE, COMBWINE),
+    [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
 };
 
 #define ALTALL   TD(TD1) // alt           -> select all
@@ -118,13 +163,14 @@ tap_dance_action_t tap_dance_actions[] = {
 #define SFTCAP   TD(TD6) // shift         -> all caps
 #define ESCAD    TD(TD7) // esc           -> ctrl alt del
 #define CLOSTW   TD(TD8) // close tab     -> close window
-#define COMML    TD(TD9) // comment line  -> comment block (linux)
-#define COMMW    TD(TD10) // comment line -> comment block (windows)
+//#define COMML    TD(TD9) // comment line  -> comment block (linux)
+//#define COMMW    TD(TD10) // comment line -> comment block (windows)
 // english versions
-#define ALTALLE  TD(TD11) // alt          -> select all
-#define NCTABE   TD(TD12) // new tab      -> close tab
-#define COMMLE   TD(TD13) // comment line -> comment block (linux)
-#define COMMWE   TD(TD14) // comment line -> comment block (windows)
+#define ALTALLE  TD(TD9) // alt          -> select all
+#define NCTABE   TD(TD10) // new tab      -> close tab
+//#define COMMLE   TD(TD13) // comment line -> comment block (linux)
+//#define COMMWE   TD(TD14) // comment line -> comment block (windows)
+#define COMMENT  TD(TD11) // comment line/block
 
 // Unicode characters
 enum unicode_names {
@@ -243,6 +289,11 @@ enum custom_keycodes {
   TOG_OS = SAFE_RANGE,
   TOG_LANG,
   SPACE4,
+  C_COMM ,
+  C_SCLN ,
+  C_COLN ,
+  C_EXLM,
+  //COMMENT
 };
 
 #define SFT      MO(_SFT)
@@ -255,7 +306,8 @@ enum custom_keycodes {
 
 /*
 TODO:
-  
+
+  FUNC layer: Page Up/Down on arrow when locking bottom right corner
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -273,49 +325,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   */
   /*____1___, ____2___, ____3___, ____4___, ____5___,    ____6___, ____7___, ____8___, ____9___, ___10___, */
 
-  // [_FR] = LAYOUT_ortho_4x10( /* CUSTOM AZERTY */
-  //   FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
-  //   FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , FR_M    ,
-  //   FR_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM ,
-  //   KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
-  // ),
-
-  /* CUSTOM AZERTY 
-  *.-----------------------------------------------------------------------------------------------------.
-  *| a       | z       | e       | r       | t       ||| y       | u       | i       | o       | p       |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| q       | s       | d       | f       | g       ||| h       | j       | k       | l       | m       |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| w       | x       | c       | v       | b       ||| n       | ,       | ;       | :       | !       |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| LGUI    | LALT    | (NUM)   | (FNTNB) | (ENG)   ||| (SFTCAP)| (SYMBOL)| (LANG)  | TOG OS  | TOG_LANG|
-  *'-----------------------------------------------------------------------------------------------------'
-  */
   [_AZ] = LAYOUT_ortho_4x10( /* CUSTOM AZERTY */
-    KC_A    , KC_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
-    KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , KC_M    ,
-    KC_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , KC_COMM , KC_SCLN , KC_COLN , KC_EXLM ,
-    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
+    FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
+    FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , FR_M    ,
+    FR_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM ,
+    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
   ),
 
-  /* SHIFT LAYER
-  *.-----------------------------------------------------------------------------------------------------.
-  *| A       | Z       | E       | R       | T       ||| Y       | U       | I       | O       | P       |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| Q       | S       | D       | F       | G       ||| H       | J       | K       | L       | M       |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| W       | X       | C       | V       | B       ||| N       | ?       | .       |         |         |
-  *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *|    ¤    |    ¤    |         |         |         ||| XXXXXXX |         |         |         |         |
-  *'-----------------------------------------------------------------------------------------------------'
-  */
-  /*____1___, ____2___, ____3___, ____4___, ____5___,    ____6___, ____7___, ____8___, ____9___, ___10___, */
-
-  [_SFT] = LAYOUT_ortho_4x10( /* SHIFT */
-    S(FR_A) , S(FR_Z) , S(KC_E) , S(KC_R) , S(KC_T) ,    S(KC_Y) , S(KC_U) , S(KC_I) , S(KC_O) , S(KC_P) ,
-    S(FR_Q) , S(KC_S) , S(KC_D) , S(KC_F) , S(KC_G) ,    S(KC_H) , S(KC_J) , S(KC_K) , S(KC_L) , S(FR_M) ,
-    S(FR_W) , S(KC_X) , S(KC_C) , S(KC_V) , S(KC_B) ,    S(KC_N) , FR_QUES , FR_DOT  , ___XX___, ___XX___,
-    ________, ________, ________, ________, ________,    ________, ________, ________, ________, ________
+  [_AZ_EN] = LAYOUT_ortho_4x10( /* CUSTOM AZERTY */
+    KC_A    , KC_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
+    KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , KC_M    ,
+    KC_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , C_COMM  , C_SCLN  , C_COLN  , KC_EXLM ,
+    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
   ),
 
   /* NUMPAD
@@ -331,14 +352,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   */
   [_NUM] = LAYOUT_ortho_4x10( /* NUMPAD */
     EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
-    COMML   , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
+    COMMENT , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
     CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
     ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   [_NUM_EN] = LAYOUT_ortho_4x10( /* NUMPAD */
     EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, KC_7    , KC_8    , KC_9    , QK_RBT  ,
-    COMMLE  , NCUT    , NCOPYE  , NPASTE  , SPACE4  ,    ___XX___, KC_4    , KC_5    , KC_6    , KC_DOT  ,
+    COMMENT , NCUT    , NCOPYE  , NPASTE  , SPACE4  ,    ___XX___, KC_4    , KC_5    , KC_6    , KC_DOT  ,
     CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
     ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , KC_0    , ___XX___, ___XX___, QK_BOOT
   ),
@@ -399,7 +420,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
-    KC_LCTL , CUT     , COPYE   , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
+    KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
     KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , ___XX___, REFRSH  , KC_F11  , KC_F12  ,
     ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , ___XX___, KC_RCTL
   ),
@@ -425,7 +446,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool process_lang_key(keyrecord_t *record, uint16_t en_key, uint16_t fr_key) {
     uint16_t key_to_process = is_french ? fr_key : en_key;
-    uprintf("Processing key: %s as %s\n", get_keycode_string(en_key), get_keycode_string(key_to_process));
+    uprintf("Processing lang key: %s as %s\n", get_keycode_string(en_key), get_keycode_string(key_to_process));
     if (record->event.pressed) {
         register_code16(key_to_process);
     } else {
@@ -435,14 +456,15 @@ bool process_lang_key(keyrecord_t *record, uint16_t en_key, uint16_t fr_key) {
 }
 
 bool scln_was_shifted = false;
+bool cln_was_shifted = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-#ifdef CONSOLE_ENABLE
   uprintf("KL: kc: 0x%04X (%s), col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, get_keycode_string(keycode), record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
-#endif 
 
   const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
+
+  uprintf("shifted: %u\n", shifted);
 
   switch (keycode) {
     case TOG_OS:
@@ -459,7 +481,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     case TOG_LANG:
       if (record->event.pressed) {
-          is_french = !is_french;
+        is_french = !is_french;
+        if (is_french) {
+          uprintf("Switching to French layout\n");
+          set_single_default_layer(_AZ);
+        } else {
+          uprintf("Switching to English layout\n");
+          set_single_default_layer(_AZ_EN);
+        }
       }
       break;
     case SPACE4:
@@ -468,10 +497,100 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
 
-    case UNDO:
-      uprintf("UNDO kc: %s\n", get_keycode_string(keycode));
-      return process_lang_key(record, LCTL(KC_Z), LCTL(FR_Z));
+    // case COMMENT:
+    //   uprint("COMMENT");
+    //   if (is_linux) {
+    //     uprintf("COMMENT LINUX");
+    //     return process_lang_key(record, COMMLE, COMML);
+    //   } else {
+    //     uprintf("COMMENT WINDOW");
+    //     return process_lang_key(record, COMMWE, COMMW);
+    //   }
+    //   break;
     
+    case C_COMM:
+      // custom comma for english keyboard (output , and ? if shifted)
+      uprintf("C_COMM kc: %s\n", get_keycode_string(keycode));
+      if (record->event.pressed) {
+        // on keydown
+        if (shifted) {
+          uprintf("C_COMM shifted down sending /\n");
+          register_code16(KC_SLSH); // S(/) = ?
+        } else {
+          uprintf("C_COMM unshifted down sending ,\n");
+          register_code16(KC_COMM);
+        }
+      } else {
+        // on keyup
+        if (shifted) {
+          uprintf("C_COMM shifted up unregistering /\n");
+          unregister_code16(KC_SLSH);
+        } else {
+          uprintf("C_COMM unshifted up unregistering ,\n");
+          unregister_code16(KC_COMM);
+        }
+      }
+      return false;
+
+    case C_SCLN:
+      // custom semicolon for english keyboard (output ; and . if shifted)
+      uprintf("C_SCLN kc: %s\n", get_keycode_string(keycode));
+      if (record->event.pressed) {
+        // on keydown - store the shift state
+        scln_was_shifted = shifted;
+        if (shifted) {
+          uprintf("C_SCLN shifted down sending .\n");
+          unregister_code(KC_LSFT);
+          register_code16(KC_DOT);
+        } else {
+          uprintf("C_SCLN unshifted down sending ;\n");
+          register_code16(KC_SCLN);
+        } 
+      } else {
+        // on keyup - use the stored shift state
+        if (scln_was_shifted) {
+          uprintf("C_SCLN shifted up unregistering .\n");
+          unregister_code16(KC_DOT);
+          register_code16(KC_LSFT);
+        } else {
+          uprintf("C_SCLN unshifted up unregistering ;\n");
+          unregister_code16(KC_SCLN);
+        }
+      }
+      return false;
+    
+    case C_COLN:
+      // custom colon for english keyboard (output : and / if shifted)
+      uprintf("C_COLN kc: %s\n", get_keycode_string(keycode));
+      if (record->event.pressed) {
+        // on keydown
+        cln_was_shifted = shifted;
+        if (shifted) {
+          uprintf("C_COLN shifted down sending /\n");
+          unregister_code(KC_LSFT);
+          register_code16(KC_SLSH);
+        } else {
+          uprintf("C_COLN unshifted down sending :\n");
+          register_code16(KC_LSFT);
+          register_code16(KC_SCLN); 
+        }
+      } else {
+        // on keyup
+        if (cln_was_shifted) {
+          uprintf("C_COLN shifted up unregistering /\n");
+          unregister_code16(KC_SLSH);
+          register_code16(KC_LSFT);
+        } else {
+          uprintf("C_COLN unshifted up unregistering :\n");
+          unregister_code16(KC_SCLN);
+          unregister_code16(KC_LSFT);
+        }
+      }
+      return false;
+
+ 
+    
+    /* 
     case KC_A:
       return process_lang_key(record, KC_A, FR_A);
     
@@ -480,7 +599,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return process_lang_key(record, KC_Z, FR_Z);
 
     case KC_Q:
-      return process_lang_key(record, KC_Q, FR_Q);  
+      return process_lang_key(record, KC_Q, FR_Q);
     
     case KC_W:
       return process_lang_key(record, KC_W, FR_W);
@@ -492,25 +611,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     //   return process_lang_key(record, KC_EXLM, FR_EXLM);
 
     case KC_EXLM:
+      uprintf("KC_EXLM kc: %s\n", get_keycode_string(keycode));
       if (record->event.pressed) {
         // on keydown
         if (shifted) {
-          register_code16(KC_NO);
+          uprintf("KC_EXLM shifted down\n");
+          //register_code16(KC_NO);
         } else {
+          uprintf("KC_EXLM unshifted down\n");
           if (is_french) {
+            uprintf("KC_EXLM unshifted down - French\n");
             register_code16(FR_EXLM);
           } else {
+            uprintf("KC_EXLM unshifted down - English\n");
             register_code16(KC_EXLM);
           }
         }
       } else {
         // on keyup
         if (shifted) {
-          unregister_code16(KC_NO);
+          uprintf("KC_EXLM shifted up\n");
+          //unregister_code16(KC_NO);
         } else {
+          uprintf("KC_EXLM unshifted up\n");
           if (is_french) {
+            uprintf("KC_EXLM unshifted up - French\n");
             unregister_code16(FR_EXLM);
           } else {
+            uprintf("KC_EXLM unshifted up - English\n");
             unregister_code16(KC_EXLM);
           }
         }
@@ -612,7 +740,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           }
         }
       }
-      return false;
+      return false; 
+    */
 
     // case KC_DOT:
     //   return process_lang_key(record, KC_DOT, FR_DOT);
@@ -623,6 +752,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
+    // AZERTY
+    // if (layer_state_cmp(state, _AZ)) {
+    //   if (!is_french) {
+    //     state &= ~(1UL << _AZ);    // Turn OFF French AZERTY layer
+    //     state |= (1UL << _AZ_EN);  // Turn ON English AZERTY layer
+    //   }
+    // } else {
+    //   state &= ~(1UL << _AZ_EN);   // Turn OFF English AZERTY layer
+    // }
+    // SYMBOL
     if (layer_state_cmp(state, _SYMB)) {
       if (!is_french) {
         state &= ~(1UL << _SYMB);    // Turn OFF French Symbol layer
@@ -631,6 +770,25 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     } else {
       state &= ~(1UL << _SYMB_EN);   // Turn OFF English Symbol layer
     }
+    // FUNCTION
+    if (layer_state_cmp(state, _FNTN)) {
+      if (!is_french) {
+        state &= ~(1UL << _FNTN);    // Turn OFF French Function layer
+        state |= (1UL << _FNTN_EN);  // Turn ON English Function layer
+      }
+    } else {
+      state &= ~(1UL << _FNTN_EN);   // Turn OFF English Function layer
+    }
+    // NUMBER
+    if (layer_state_cmp(state, _NUM)) {
+      if (!is_french) {
+        state &= ~(1UL << _NUM);    // Turn OFF French Numpad layer
+        state |= (1UL << _NUM_EN);  // Turn ON English Numpad layer
+      }
+    } else {
+      state &= ~(1UL << _NUM_EN);   // Turn OFF English Numpad layer
+    }
+
     return state;
 }
 
