@@ -1,13 +1,13 @@
 // qmk compile -kb=sporewoh/keezyboost40 -km=jan
 // qmk flash -kb=sporewoh/keezyboost40 -km=jan
 
-#include "print.h"
+// #include "print.h"
 #include QMK_KEYBOARD_H
 #include "keymap_french.h"
 #include "layer_names.h"
 #include "sendstring_french.h"
 
-bool is_linux = false; // default to windows
+bool is_linux = true; // default to linux
 bool is_french = true; // default to french
 
 // Key Combo
@@ -77,26 +77,21 @@ bool is_french = true; // default to french
 
 // Tap Dance Declarations
 void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
-    uprintf("Comment tap dance, count: %d\n", state->count);
     uint16_t line_comment;
     uint16_t block_comment;
 
     if (is_linux) {
-        uprintf("Comment tap dance, linux\n");
         line_comment = is_french ? COMLIN : COMLINE;
         block_comment = is_french ? COMBLIN : COMBLINE;
     } else {
-        uprintf("Comment tap dance, windows\n");
         line_comment = is_french ? COMWIN : COMWINE;
         block_comment = is_french ? COMBWIN : COMBWINE;
     }
 
     if (state->count == 1) {
-        uprintf("Comment tap dance, single tap\n");
         // On single tap, register the line comment shortcut
         register_code16(line_comment);
     } else if (state->count == 2) {
-        uprintf("Comment tap dance, double tap\n");
         // On double tap, register the block comment shortcut
         // Unregister the line comment first to avoid conflicts
         unregister_code16(line_comment);
@@ -105,7 +100,6 @@ void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
 }
 
 void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
-    uprint("Comment tap dance reset\n");
     // Unregister all possible comment shortcuts on reset (key up)
     unregister_code16(COMLIN);
     unregister_code16(COMLINE);
@@ -145,13 +139,10 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
     [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
     [TD8]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
-    //[TD9]  = ACTION_TAP_DANCE_DOUBLE(COMLIN, COMBLIN),
-    //[TD10] = ACTION_TAP_DANCE_DOUBLE(COMWIN, COMBWIN),
     // english tap dance
     [TD9]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
     [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
-    //[TD13]  = ACTION_TAP_DANCE_DOUBLE(COMLINE, COMBLINE),
-    //[TD14]  = ACTION_TAP_DANCE_DOUBLE(COMWINE, COMBWINE),
+    // comment tap dance
     [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
 };
 
@@ -163,13 +154,10 @@ tap_dance_action_t tap_dance_actions[] = {
 #define SFTCAP   TD(TD6) // shift         -> all caps
 #define ESCAD    TD(TD7) // esc           -> ctrl alt del
 #define CLOSTW   TD(TD8) // close tab     -> close window
-//#define COMML    TD(TD9) // comment line  -> comment block (linux)
-//#define COMMW    TD(TD10) // comment line -> comment block (windows)
 // english versions
 #define ALTALLE  TD(TD9) // alt          -> select all
 #define NCTABE   TD(TD10) // new tab      -> close tab
-//#define COMMLE   TD(TD13) // comment line -> comment block (linux)
-//#define COMMWE   TD(TD14) // comment line -> comment block (windows)
+// comment
 #define COMMENT  TD(TD11) // comment line/block
 
 // Unicode characters
@@ -293,12 +281,10 @@ enum custom_keycodes {
   C_SCLN ,
   C_COLN ,
   C_EXLM,
-  //COMMENT
 };
 
 #define SFT      MO(_SFT)
 #define NUM      LT(_NUM, KC_SPC)
-// #define PROG     MO(_SYMB)
 #define SYMSPC   LT(_SYMB, KC_SPC)
 #define FNTN     LT(_FNTN, KC_SPC)
 #define FNTNB    LT(_FNTN, KC_BSPC)
@@ -307,7 +293,8 @@ enum custom_keycodes {
 /*
 TODO:
 
-  FUNC layer: Page Up/Down on arrow when locking bottom right corner
+  - FUNC layer: Page Up/Down on arrow when locking bottom right corner
+
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -433,20 +420,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | ś       | ź       | ć       | č       |         ||| ñ       | ň       | ń       |         |         |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | à       | é       | ç       | è       | (SFTCAP)|||    ¤    |         | XXXXXXX |         |         |
+  * | à       | é       | ç       | è       | (SFTCAP)||| (SFTCAP)|         | XXXXXXX |         |         |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_LANG] = LAYOUT_ortho_4x10( /* LANGUAGE */
     K_AACUTE, K_ZCARON, K_ECARON, K_RCARON, K_TCARON,    K_YACUTE, K_UACUTE, K_IACUTE, K_OACUTE, ___XX___,
     K_SCARON, K_SSHARP, K_DSTROK, ___XX___, ___XX___,    ___XX___, ___XX___, ___XX___, K_LSTROK, ___XX___,
     K_SACUTE, K_ZACUTE, K_CACUTE, K_CCARON, ___XX___,    K_NTILDE, K_NCARON, K_NACUTE, ___XX___, ___XX___,
-    FR_AGRV , FR_EACU , FR_CCED , FR_EGRV , SFTCAP  ,    ___XX___, ___XX___, ________, ___XX___, ___XX___
+    FR_AGRV , FR_EACU , FR_CCED , FR_EGRV , SFTCAP  ,    SFTCAP  , ___XX___, ________, ___XX___, ___XX___
   ),
 };
 
 bool process_lang_key(keyrecord_t *record, uint16_t en_key, uint16_t fr_key) {
     uint16_t key_to_process = is_french ? fr_key : en_key;
-    uprintf("Processing lang key: %s as %s\n", get_keycode_string(en_key), get_keycode_string(key_to_process));
     if (record->event.pressed) {
         register_code16(key_to_process);
     } else {
@@ -460,11 +446,7 @@ bool cln_was_shifted = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
-  uprintf("KL: kc: 0x%04X (%s), col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, get_keycode_string(keycode), record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
-
   const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
-
-  uprintf("shifted: %u\n", shifted);
 
   switch (keycode) {
     case TOG_OS:
@@ -479,54 +461,38 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       break;
+
     case TOG_LANG:
       if (record->event.pressed) {
         is_french = !is_french;
         if (is_french) {
-          uprintf("Switching to French layout\n");
           set_single_default_layer(_AZ);
         } else {
-          uprintf("Switching to English layout\n");
           set_single_default_layer(_AZ_EN);
         }
       }
       break;
+      
     case SPACE4:
       if (record->event.pressed) {
         SEND_STRING("    ");
       }
       break;
 
-    // case COMMENT:
-    //   uprint("COMMENT");
-    //   if (is_linux) {
-    //     uprintf("COMMENT LINUX");
-    //     return process_lang_key(record, COMMLE, COMML);
-    //   } else {
-    //     uprintf("COMMENT WINDOW");
-    //     return process_lang_key(record, COMMWE, COMMW);
-    //   }
-    //   break;
-    
     case C_COMM:
       // custom comma for english keyboard (output , and ? if shifted)
-      uprintf("C_COMM kc: %s\n", get_keycode_string(keycode));
       if (record->event.pressed) {
         // on keydown
         if (shifted) {
-          uprintf("C_COMM shifted down sending /\n");
           register_code16(KC_SLSH); // S(/) = ?
         } else {
-          uprintf("C_COMM unshifted down sending ,\n");
           register_code16(KC_COMM);
         }
       } else {
         // on keyup
         if (shifted) {
-          uprintf("C_COMM shifted up unregistering /\n");
           unregister_code16(KC_SLSH);
         } else {
-          uprintf("C_COMM unshifted up unregistering ,\n");
           unregister_code16(KC_COMM);
         }
       }
@@ -534,26 +500,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     case C_SCLN:
       // custom semicolon for english keyboard (output ; and . if shifted)
-      uprintf("C_SCLN kc: %s\n", get_keycode_string(keycode));
       if (record->event.pressed) {
         // on keydown - store the shift state
         scln_was_shifted = shifted;
         if (shifted) {
-          uprintf("C_SCLN shifted down sending .\n");
           unregister_code(KC_LSFT);
           register_code16(KC_DOT);
         } else {
-          uprintf("C_SCLN unshifted down sending ;\n");
           register_code16(KC_SCLN);
         } 
       } else {
         // on keyup - use the stored shift state
         if (scln_was_shifted) {
-          uprintf("C_SCLN shifted up unregistering .\n");
           unregister_code16(KC_DOT);
           register_code16(KC_LSFT);
         } else {
-          uprintf("C_SCLN unshifted up unregistering ;\n");
           unregister_code16(KC_SCLN);
         }
       }
@@ -561,206 +522,33 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     
     case C_COLN:
       // custom colon for english keyboard (output : and / if shifted)
-      uprintf("C_COLN kc: %s\n", get_keycode_string(keycode));
       if (record->event.pressed) {
         // on keydown
         cln_was_shifted = shifted;
         if (shifted) {
-          uprintf("C_COLN shifted down sending /\n");
           unregister_code(KC_LSFT);
           register_code16(KC_SLSH);
         } else {
-          uprintf("C_COLN unshifted down sending :\n");
           register_code16(KC_LSFT);
           register_code16(KC_SCLN); 
         }
       } else {
         // on keyup
         if (cln_was_shifted) {
-          uprintf("C_COLN shifted up unregistering /\n");
           unregister_code16(KC_SLSH);
           register_code16(KC_LSFT);
         } else {
-          uprintf("C_COLN unshifted up unregistering :\n");
           unregister_code16(KC_SCLN);
           unregister_code16(KC_LSFT);
         }
       }
       return false;
 
- 
-    
-    /* 
-    case KC_A:
-      return process_lang_key(record, KC_A, FR_A);
-    
-    case KC_Z:
-      uprintf("KC_Z kc: %s\n", get_keycode_string(keycode));
-      return process_lang_key(record, KC_Z, FR_Z);
-
-    case KC_Q:
-      return process_lang_key(record, KC_Q, FR_Q);
-    
-    case KC_W:
-      return process_lang_key(record, KC_W, FR_W);
-
-    case KC_M:
-      return process_lang_key(record, KC_M, FR_M);
-
-    // case EXLM:
-    //   return process_lang_key(record, KC_EXLM, FR_EXLM);
-
-    case KC_EXLM:
-      uprintf("KC_EXLM kc: %s\n", get_keycode_string(keycode));
-      if (record->event.pressed) {
-        // on keydown
-        if (shifted) {
-          uprintf("KC_EXLM shifted down\n");
-          //register_code16(KC_NO);
-        } else {
-          uprintf("KC_EXLM unshifted down\n");
-          if (is_french) {
-            uprintf("KC_EXLM unshifted down - French\n");
-            register_code16(FR_EXLM);
-          } else {
-            uprintf("KC_EXLM unshifted down - English\n");
-            register_code16(KC_EXLM);
-          }
-        }
-      } else {
-        // on keyup
-        if (shifted) {
-          uprintf("KC_EXLM shifted up\n");
-          //unregister_code16(KC_NO);
-        } else {
-          uprintf("KC_EXLM unshifted up\n");
-          if (is_french) {
-            uprintf("KC_EXLM unshifted up - French\n");
-            unregister_code16(FR_EXLM);
-          } else {
-            uprintf("KC_EXLM unshifted up - English\n");
-            unregister_code16(KC_EXLM);
-          }
-        }
-      }
-      return false;
-
-    case KC_COLN:
-      if (record->event.pressed) {
-        // on keydown
-        if (shifted) {
-          register_code16(KC_NO);
-        } else {
-          if (is_french) {
-            register_code16(FR_COLN);
-          } else {
-            register_code16(KC_COLN);
-          }
-        }
-      } else {
-        // on keyup
-        if (shifted) {
-          unregister_code16(KC_NO);
-        } else {
-          if (is_french) {
-            unregister_code16(FR_COLN);
-          } else {
-            unregister_code16(KC_COLN);
-          }
-        }
-      }
-      return false;
-    
-    case KC_SCLN:
-      if (record->event.pressed) {
-        // on keydown - store the shift state
-        scln_was_shifted = shifted;
-        if (shifted) {
-          if (is_french) {
-            register_code16(FR_DOT);
-          } else {
-            unregister_code(KC_LSFT);
-            register_code16(KC_DOT);
-          }
-        } else {
-          if (is_french) {
-            register_code16(FR_SCLN);
-          } else {
-            register_code16(KC_SCLN);
-          }
-        }
-      } else {
-        // on keyup - use the stored shift state
-        if (scln_was_shifted) {
-          if (is_french) {
-            unregister_code16(FR_DOT);
-          } else {
-            unregister_code16(KC_DOT);
-            register_code16(KC_LSFT);
-          }
-        } else {
-          if (is_french) {
-            unregister_code16(FR_SCLN);
-          } else {
-            unregister_code16(KC_SCLN);
-          }
-        }
-      }
-      return false;
-
-    case KC_COMM:
-      if (record->event.pressed) {
-        // on keydown
-        if (shifted) {
-          if (is_french) {
-            register_code16(FR_QUES);
-          } else {
-            register_code16(KC_SLSH); // S(/) = ?
-          }
-        } else {
-          if (is_french) {
-            register_code16(FR_COMM);
-          } else {
-            register_code16(KC_COMM);
-          }
-        }
-      } else {
-        // on keyup
-        if (shifted) {
-          if (is_french) {
-            unregister_code16(FR_QUES);
-          } else {
-            unregister_code16(KC_SLSH);
-          }
-        } else {
-          if (is_french) {
-            unregister_code16(FR_COMM);
-          } else {
-            unregister_code16(KC_COMM);
-          }
-        }
-      }
-      return false; 
-    */
-
-    // case KC_DOT:
-    //   return process_lang_key(record, KC_DOT, FR_DOT);
-
-
   }
   return true;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    // AZERTY
-    // if (layer_state_cmp(state, _AZ)) {
-    //   if (!is_french) {
-    //     state &= ~(1UL << _AZ);    // Turn OFF French AZERTY layer
-    //     state |= (1UL << _AZ_EN);  // Turn ON English AZERTY layer
-    //   }
-    // } else {
-    //   state &= ~(1UL << _AZ_EN);   // Turn OFF English AZERTY layer
-    // }
     // SYMBOL
     if (layer_state_cmp(state, _SYMB)) {
       if (!is_french) {
@@ -798,11 +586,11 @@ void matrix_init_user(void) {
 }
 
 void keyboard_post_init_user(void) {
-  debug_enable=true;
-  debug_matrix=true;
-  debug_keyboard=true;
+  // debug_enable=true;
+  // debug_matrix=true;
+  // debug_keyboard=true;
   set_unicode_input_mode(UNICODE_MODE_WINDOWS);
-  is_linux = false;
+  is_linux = true;
   is_french = true;
 }
 

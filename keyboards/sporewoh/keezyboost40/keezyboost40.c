@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "keezyboost40.h"
 
 #include <string.h>
-#include <math.h>
 #include "quantum.h"
 #include <hal_pal.h>
 #include "hal.h"
@@ -160,6 +159,8 @@ void ui_task(void) {
         // Draw Shift status
         static const char *shift_text = "Shift:";
         qp_drawtext_recolor(lcd, 20, 100, font, shift_text, HSV_RED, HSV_BLACK);
+
+        qp_rect(lcd, value_x_pos, 100, LCD_WIDTH - 1, 100 + font->line_height, HSV_BLACK, true);
         
         if (shift_pressed) {
             qp_drawtext_recolor(lcd, value_x_pos, 100, font, "ON", HSV_RED, HSV_BLACK);
@@ -173,6 +174,8 @@ void ui_task(void) {
         // Draw Caps Lock status
         static const char *caps_text = "Caps:";
         qp_drawtext_recolor(lcd, 20, 80, font, caps_text, HSV_RED, HSV_BLACK);
+
+        qp_rect(lcd, value_x_pos, 80, LCD_WIDTH - 1, 80 + font->line_height, HSV_BLACK, true);
         
         if (caps_locked) {
             qp_drawtext_recolor(lcd, value_x_pos, 80, font, "ON", HSV_RED, HSV_BLACK);
@@ -186,7 +189,9 @@ void ui_task(void) {
         // Draw Language text
         static const char *lang_text = "Lang:";
         qp_drawtext_recolor(lcd, 20, 60, font, lang_text, HSV_RED, HSV_BLACK);
-        
+
+        qp_rect(lcd, value_x_pos, 60, LCD_WIDTH - 1, 60 + font->line_height, HSV_BLACK, true);
+
         if (is_french) {
             qp_drawtext_recolor(lcd, value_x_pos, 60, font, "French", HSV_RED, HSV_BLACK);
         } else {
@@ -202,7 +207,3 @@ void ui_task(void) {
 void housekeeping_task_kb(void) {
     ui_task();
 }
-
-// void housekeeping_task_user(void) {
-
-// }
