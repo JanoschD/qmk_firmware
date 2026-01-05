@@ -54,7 +54,7 @@ bool is_french = true; // default to french
 #define TERM     LCTL(S(LALT(KC_T)))  // vs code custom: Focus linux terminal
 #define BKTOG    LCTL(LALT(KC_K))     // vs code: Bookmark toggle
 #define BKNEXT   LCTL(LALT(KC_L))     // vs code: Bookmark next
-#define BKPRV    LCTL(LALT(KC_J))     // vs code: Bookmark previous
+#define BKPRV    LCTL(LALT(S(KC_J)))  // vs code: Bookmark previous
 
 #define TEAMUTE  LCTL(S(FR_M))        // ms team: mute
 #define SFTENT   S(KC_ENT)            // shift enter
@@ -111,6 +111,34 @@ void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
     unregister_code16(COMBWINE);
 }
 
+void bookmark_tap_dance(tap_dance_state_t *state, void *user_data) {
+  
+  const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
+
+  if (state->count == 1) {
+    if (shifted) {
+      // If Shift is held, go to previous bookmark
+      register_code16(BKPRV);
+    } else {
+      // Otherwise, go to next bookmark
+      register_code16(BKNEXT);
+    }
+  } else if (state->count == 2) {
+    // On double tap, toggle bookmark
+    unregister_code16(BKPRV);
+    unregister_code16(BKNEXT);
+    register_code16(BKTOG);
+  }
+
+}
+
+void bookmark_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
+  // Unregister all possible bookmark shortcuts on reset (key up)
+  unregister_code16(BKPRV);
+  unregister_code16(BKNEXT);
+  unregister_code16(BKTOG);
+}
+
 // https://jayliu50.github.io/qmk-cheatsheet/
 enum {
     TD1 = 0,
@@ -144,6 +172,8 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
     // comment tap dance
     [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
+    // bookmark tap dance
+    [TD12] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bookmark_tap_dance, bookmark_tap_dance_reset),
 };
 
 #define ALTALL   TD(TD1) // alt           -> select all
@@ -159,6 +189,8 @@ tap_dance_action_t tap_dance_actions[] = {
 #define NCTABE   TD(TD10) // new tab      -> close tab
 // comment
 #define COMMENT  TD(TD11) // comment line/block
+// bookmark
+#define BOOKMARK TD(TD12) // bookmark next/previous/toggle
 
 // Unicode characters
 enum unicode_names {
@@ -307,7 +339,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *| w       | x       | c       | v       | b       ||| n       | ,       | ;       | :       | !       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| LGUI    | LALT    | (NUM)   | (FNTNB) | (ENG)   ||| (SFTCAP)| (SYMSPC)| (LANG)  | TOG OS  | TOG_LANG|
+  *| CTL     | LALT    | (NUM)   | (FNTNB) | (ENG)   ||| (SFTCAP)| (SYMSPC)| (LANG)  | TOG OS  | TOG_LANG|
   *'-----------------------------------------------------------------------------------------------------'
   */
   /*____1___, ____2___, ____3___, ____4___, ____5___,    ____6___, ____7___, ____8___, ____9___, ___10___, */
@@ -316,14 +348,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
     FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , FR_M    ,
     FR_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM ,
-    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
+    KC_LCTL , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
   ),
 
   [_AZ_EN] = LAYOUT_ortho_4x10( /* CUSTOM AZERTY */
     KC_A    , KC_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
     KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , KC_M    ,
     KC_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , C_COMM  , C_SCLN  , C_COLN  , KC_EXLM ,
-    KC_LGUI , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
+    KC_LCTL , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
   ),
 
   /* NUMPAD
@@ -332,7 +364,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | COMMENT | NCUT    | NCOPY   | NPASTE  | SPACE4  |||         | 4       | 5       | 6       | .       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | CTLK    | TERM    | BKTOG   | BKPRV   | BKNEXT  |||         | 1       | 2       | 3       | ,       |
+  * | CTLK    | TERM    |BOOKMARK |         |         |||         | 1       | 2       | 3       | ,       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * |    ¤    |    ¤    | XXXXXXX |         |   ¤     |||    ¤    | 0       |         |         | FLASH   |
   * '-----------------------------------------------------------------------------------------------------'
@@ -340,42 +372,42 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_NUM] = LAYOUT_ortho_4x10( /* NUMPAD */
     EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
     COMMENT , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
-    CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
+    CTLK    , TERM    , BOOKMARK, ___XX___, ___XX___,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
     ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   [_NUM_EN] = LAYOUT_ortho_4x10( /* NUMPAD */
     EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, KC_7    , KC_8    , KC_9    , QK_RBT  ,
     COMMENT , NCUT    , NCOPYE  , NPASTE  , SPACE4  ,    ___XX___, KC_4    , KC_5    , KC_6    , KC_DOT  ,
-    CTLK    , TERM    , BKTOG   , BKPRV   , BKNEXT  ,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
+    CTLK    , TERM    , BOOKMARK, ___XX___, ___XX___,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
     ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , KC_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   /* SYMBOL LAYER
   *.-----------------------------------------------------------------------------------------------------.
-  *| A = &   | ~       | "       | '       | `       ||| -       | U = _   | I = |   | O = °   | P = %   |
+  *| A = &   | ~       | "       | '       | `       ||| -       | U = _   | I = |   | $       | P = %   |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *| <       | [       | {       | (       | =       ||| +       | )       | }       | ]       | >       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *| €       | X = *   | C = ^   | #       | /       ||| \       | $       | ^ (dead)| ¨       | @       |
+  *| €       | X = *   | C = ^   | #       | /       ||| \       | °       | ^ (dead)| ¨       | @       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *|    ¤    |    ¤    |         |         |   ¤     |||    ¤    | XXXXXXX |    ¤    |         |         |
   *'-----------------------------------------------------------------------------------------------------'
   */ 
   [_SYMB] = LAYOUT_ortho_4x10( /* SYMBOL */
-    FR_AMPR , FR_TILD , FR_DQUO , FR_QUOT , FR_GRV  ,    FR_MINS , FR_UNDS , FR_PIPE , FR_DEG  , FR_PERC ,
+    FR_AMPR , FR_TILD , FR_DQUO , FR_QUOT , FR_GRV  ,    FR_MINS , FR_UNDS , FR_PIPE , FR_DLR  , FR_PERC ,
     FR_LABK , FR_LBRC , FR_LCBR , FR_LPRN , FR_EQL  ,    FR_PLUS , FR_RPRN , FR_RCBR , FR_RBRC , FR_RABK ,
-    FR_EURO , FR_ASTR , FR_CCIRC, FR_HASH , FR_SLSH ,    FR_BSLS , FR_DLR  , FR_CIRC , FR_DIAE , FR_AT   ,
+    FR_EURO , FR_ASTR , FR_CCIRC, FR_HASH , FR_SLSH ,    FR_BSLS , FR_DEG  , FR_CIRC , FR_DIAE , FR_AT   ,
     ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,    ___XX___, ________, ___XX___, ___XX___, ___XX___
   ),
 
   /* SYMBOL ENGLISH LAYER
   *.-----------------------------------------------------------------------------------------------------.
-  *| A = &   | ~       | "       | '       | `       ||| -       | U = _   | I = |   |         | P = %   |
+  *| A = &   | ~       | "       | '       | `       ||| -       | U = _   | I = |   | $       | P = %   |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *| <       | [       | {       | (       | =       ||| +       | )       | }       | ]       | >       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *|         | X = *   | C = ^   | #       | /       ||| \       | $       |    ¤    |         | @       |
+  *|         | X = *   | C = ^   | #       | /       ||| \       |         |    ¤    |         | @       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *|    ¤    |    ¤    |         |         |   ¤     |||    ¤    | XXXXXXX |    ¤    |         |         |
   *'-----------------------------------------------------------------------------------------------------'
@@ -393,23 +425,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | CTRL    | CUT     | COPY    | PASTE   | TAB     |||    ¤    | LEFT    | DOWN    | RIGHT   | BSPC    |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | SHIFT   | SAVE    | CTLD    | FIND    | REPLACE ||| DBL CLK |    ¤    | REFRSH  | F11     | F12     |
+  * | SHIFT   | SAVE    | CTLD    | FIND    | REPLACE ||| SELECTW |    ?    |    .    |    /    | F11     |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | ESCAD   | CLOSTW  | PALETTE | XXXXXXX | F2      |||         | SHIFT   | RGUI    |         | RCTL    |
+  * | ESCAD   | CLOSTW  | PALETTE | XXXXXXX | F2      ||| REFRSH  | SHIFT   | RGUI    | RCTL    | F12     |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_FNTN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
-    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , ___XX___, REFRSH  , KC_F11  , KC_F12  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , ___XX___, KC_RCTL
+    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , FR_QUES , FR_DOT  , FR_SLSH , KC_F11  ,
+    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    REFRSH  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
-    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , ___XX___, REFRSH  , KC_F11  , KC_F12  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , ___XX___, KC_RCTL
+    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , KC_QUES , KC_DOT  , KC_SLSH , KC_F11  ,
+    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    REFRSH  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   /* LANGUAGE LAYER
@@ -472,7 +504,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       break;
-      
+
     case SPACE4:
       if (record->event.pressed) {
         SEND_STRING("    ");
