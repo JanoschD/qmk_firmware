@@ -18,6 +18,7 @@ bool is_french = true; // default to french
 #define CUT      LCTL(KC_X)           // ctrl + X = cut
 #define COPY     LCTL(KC_C)           // ctrl + C = copy
 #define PASTE    LCTL(KC_V)           // ctrl + V = paste
+#define PASTEW   LGUI(KC_V)           // win  + V = paste with windows clipboard history
 #define UNDO     LCTL(FR_Z)           // ctrl + Z = undo
 #define UNDOE    LCTL(KC_Z)           // ctrl + Z = undo (for english)
 #define REDO     LCTL(KC_Y)           // ctrl + Y = redo
@@ -139,6 +140,19 @@ void bookmark_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
   unregister_code16(BKTOG);
 }
 
+// triple tap: paste -> mouse middle button -> windows paste history
+void paste_dance(tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1) {
+      tap_code16(PASTE);
+    } else if (state->count == 2) {
+      tap_code16(MMDLBTN);
+    } else if (state->count == 3) {
+      tap_code16(PASTEW);
+    } else {
+      reset_tap_dance(state);
+    }
+}
+
 // https://jayliu50.github.io/qmk-cheatsheet/
 enum {
     TD1 = 0,
@@ -162,7 +176,8 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD1]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTA),
     [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
     [TD3]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
-    [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
+    // [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
+    [TD4]  = ACTION_TAP_DANCE_FN(paste_dance),
     [TD5]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
     [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
     [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
@@ -423,25 +438,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * .-----------------------------------------------------------------------------------------------------.
   * | ALT     | UNDO    | DEL     | ENT     | NEWTAB  ||| F6      | HOME    | UP      | END     | MENU    |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | CTRL    | CUT     | COPY    | PASTE   | TAB     |||    ¤    | LEFT    | DOWN    | RIGHT   | BSPC    |
+  * | CTRL    | CUT     | COPY    | PASTE   | TAB     ||| SELECTW | LEFT    | DOWN    | RIGHT   | BSPC    |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | SHIFT   | SAVE    | CTLD    | FIND    | REPLACE ||| SELECTW |    ?    |    .    |    /    | F11     |
+  * | SHIFT   | SAVE    | CTLD    | FIND    | REPLACE ||| REFRSH  |    ?    |    .    |    /    | F11     |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | ESCAD   | CLOSTW  | PALETTE | XXXXXXX | F2      ||| REFRSH  | SHIFT   | RGUI    | RCTL    | F12     |
+  * | ESCAD   | CLOSTW  | PALETTE | XXXXXXX | RENAME  |||         | SHIFT   | RGUI    | RCTL    | F12     |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_FNTN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
-    KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
-    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , FR_QUES , FR_DOT  , FR_SLSH , KC_F11  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    REFRSH  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
+    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , FR_QUES , FR_DOT  , FR_SLSH , KC_F11  ,
+    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
-    KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    ___XX___, KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
-    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    SELECTW , KC_QUES , KC_DOT  , KC_SLSH , KC_F11  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    REFRSH  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
+    KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , KC_QUES , KC_DOT  , KC_SLSH , KC_F11  ,
+    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   /* LANGUAGE LAYER
