@@ -126,12 +126,14 @@ void ui_task(void) {
         switch (current_layer) {
             case _AZ:      layer_name = "AZERTY"; break;
             case _AZ_EN:   layer_name = "AZERTY_EN"; break;
+            case _AZ_RT:   layer_name = "AZERTY_RT"; break;
             case _NUM:     layer_name = "NUMBER"; break;
             case _NUM_EN:  layer_name = "NUMBER_EN"; break;
             case _SYMB:    layer_name = "SYMBOL"; break;
             case _SYMB_EN: layer_name = "SYMBOL_EN"; break;
             case _FNTN:    layer_name = "FUNCTION"; break;
             case _FNTN_EN: layer_name = "FUNCTION_EN"; break;
+            case _BROWS:   layer_name = "BROWSER"; break;
             case _LANG:    layer_name = "LANGUAGE"; break;
             default:       layer_name = "_PANIC_"; break;
         }

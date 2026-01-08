@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* COL2ROW or ROW2COL */
 
-#define DYNAMIC_KEYMAP_LAYER_COUNT 10
+#define DYNAMIC_KEYMAP_LAYER_COUNT 12
 
 /* SPI settings. */
 #define SPI_DRIVER SPID0
@@ -57,3 +57,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UNICODE_SELECTED_MODES UNICODE_MODE_MACOS, UNICODE_MODE_WINDOWS
 #define UNICODE_CYCLE_PERSIST false
 #define TAPPING_TERM 200
+
+#define MK_KINETIC_SPEED

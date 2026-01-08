@@ -37,6 +37,8 @@ bool is_french = true; // default to french
 #define COMP     KC_RWIN              // linux compose
 #define MMDLBTN  MS_BTN3              // mouse middle button
 #define SELECTW  S(LALT(KC_RIGHT))    // select word
+#define WINEMO   LGUI(FR_SCLN)        // windows emoji panel
+#define WINEMOE  LGUI(KC_DOT)         // windows emoji panel (for english)
 
 // vs code shortcut
 #define CTLD     LCTL(KC_D)           // ctrl + D
@@ -91,26 +93,30 @@ void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
 
     if (state->count == 1) {
         // On single tap, register the line comment shortcut
-        register_code16(line_comment);
+        // register_code16(line_comment);
+        tap_code16(line_comment);
     } else if (state->count == 2) {
         // On double tap, register the block comment shortcut
         // Unregister the line comment first to avoid conflicts
-        unregister_code16(line_comment);
-        register_code16(block_comment);
+        // unregister_code16(line_comment);
+        // register_code16(block_comment);
+        tap_code16(block_comment);
+    } else {
+        reset_tap_dance(state);
     }
 }
 
-void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
-    // Unregister all possible comment shortcuts on reset (key up)
-    unregister_code16(COMLIN);
-    unregister_code16(COMLINE);
-    unregister_code16(COMWIN);
-    unregister_code16(COMWINE);
-    unregister_code16(COMBLIN);
-    unregister_code16(COMBLINE);
-    unregister_code16(COMBWIN);
-    unregister_code16(COMBWINE);
-}
+// void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
+//     // Unregister all possible comment shortcuts on reset (key up)
+//     unregister_code16(COMLIN);
+//     unregister_code16(COMLINE);
+//     unregister_code16(COMWIN);
+//     unregister_code16(COMWINE);
+//     unregister_code16(COMBLIN);
+//     unregister_code16(COMBLINE);
+//     unregister_code16(COMBWIN);
+//     unregister_code16(COMBWINE);
+// }
 
 void bookmark_tap_dance(tap_dance_state_t *state, void *user_data) {
   
@@ -119,29 +125,34 @@ void bookmark_tap_dance(tap_dance_state_t *state, void *user_data) {
   if (state->count == 1) {
     if (shifted) {
       // If Shift is held, go to previous bookmark
-      register_code16(BKPRV);
+      // register_code16(BKPRV);
+      tap_code16(BKPRV);
     } else {
       // Otherwise, go to next bookmark
-      register_code16(BKNEXT);
+      // register_code16(BKNEXT);
+      tap_code16(BKNEXT);
     }
   } else if (state->count == 2) {
     // On double tap, toggle bookmark
-    unregister_code16(BKPRV);
-    unregister_code16(BKNEXT);
-    register_code16(BKTOG);
+    // unregister_code16(BKPRV);
+    // unregister_code16(BKNEXT);
+    // register_code16(BKTOG);
+    tap_code16(BKTOG);
+  } else {
+    reset_tap_dance(state);
   }
 
 }
 
-void bookmark_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
+/* void bookmark_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
   // Unregister all possible bookmark shortcuts on reset (key up)
   unregister_code16(BKPRV);
   unregister_code16(BKNEXT);
   unregister_code16(BKTOG);
-}
+} */
 
 // triple tap: paste -> mouse middle button -> windows paste history
-void paste_dance(tap_dance_state_t *state, void *user_data) {
+void paste_tap_dance(tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
       tap_code16(PASTE);
     } else if (state->count == 2) {
@@ -177,7 +188,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
     [TD3]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
     // [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
-    [TD4]  = ACTION_TAP_DANCE_FN(paste_dance),
+    [TD4]  = ACTION_TAP_DANCE_FN(paste_tap_dance),
     [TD5]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
     [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
     [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
@@ -186,9 +197,12 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD9]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
     [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
     // comment tap dance
-    [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
+    // [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
+    [TD11] = ACTION_TAP_DANCE_FN(comment_tap_dance),
     // bookmark tap dance
-    [TD12] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bookmark_tap_dance, bookmark_tap_dance_reset),
+    // [TD12] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bookmark_tap_dance, bookmark_tap_dance_reset),
+    [TD12] = ACTION_TAP_DANCE_FN(bookmark_tap_dance),
+    [TD13] = ACTION_TAP_DANCE_DOUBLE(KC_APP, WINEMO),
 };
 
 #define ALTALL   TD(TD1) // alt           -> select all
@@ -206,6 +220,8 @@ tap_dance_action_t tap_dance_actions[] = {
 #define COMMENT  TD(TD11) // comment line/block
 // bookmark
 #define BOOKMARK TD(TD12) // bookmark next/previous/toggle
+// windows emoji
+#define APPWIN   TD(TD13) // apps -> windows emoji panel
 
 // Unicode characters
 enum unicode_names {
@@ -336,11 +352,15 @@ enum custom_keycodes {
 #define FNTN     LT(_FNTN, KC_SPC)
 #define FNTNB    LT(_FNTN, KC_BSPC)
 #define LANG     MO(_LANG)
+#define AZRT     MO(_AZ_RT)
+#define BROWS    MO(_BROWS)
 
 /*
 TODO:
 
   - FUNC layer: Page Up/Down on arrow when locking bottom right corner
+
+  - Ctrl + 1 ..9 to switch vs code split screens
 
 */
 
@@ -363,7 +383,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     FR_A    , FR_Z    , KC_E    , KC_R    , KC_T    ,    KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    ,
     FR_Q    , KC_S    , KC_D    , KC_F    , KC_G    ,    KC_H    , KC_J    , KC_K    , KC_L    , FR_M    ,
     FR_W    , KC_X    , KC_C    , KC_V    , KC_B    ,    KC_N    , FR_COMM , FR_SCLN , FR_COLN , FR_EXLM ,
-    KC_LCTL , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
+    KC_LCTL , KC_LALT , NUM     , FNTNB   , AZRT    ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG    
   ),
 
   [_AZ_EN] = LAYOUT_ortho_4x10( /* CUSTOM AZERTY */
@@ -373,29 +393,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_LCTL , KC_LALT , NUM     , FNTNB   , SFTCAP  ,    SFTCAP  , SYMSPC  , LANG    , TOG_OS  , TOG_LANG
   ),
 
+  [_AZ_RT] = LAYOUT_ortho_4x10(  /* AZERTY RIGHT HAND */
+    KC_P    , KC_O    , KC_I    , KC_U    , KC_Y    ,   ___XX___, MS_BTN1 , MS_UP   , MS_BTN2 , ___XX___,
+    FR_M    , KC_L    , KC_K    , KC_J    , KC_H    ,   ___XX___, MS_LEFT , MS_DOWN , MS_RGHT , ___XX___,
+    FR_EXLM , FR_COLN , FR_SCLN , FR_COMM , KC_N    ,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
+    ________, ________, ___XX___, ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___
+  ),
+
   /* NUMPAD
   * .-----------------------------------------------------------------------------------------------------.
   * | EXPAND  | REDO    |PRINT SCR| SFTENT  |         |||         | 7       | 8       | 9       | REBOOT  |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | COMMENT | NCUT    | NCOPY   | NPASTE  | SPACE4  |||         | 4       | 5       | 6       | .       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | CTLK    | TERM    |BOOKMARK |         |         |||         | 1       | 2       | 3       | ,       |
+  * | CTLK    | TERM    |BOOKMARK | EXPAND  |         |||         | 1       | 2       | 3       | ,       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * |    ¤    |    ¤    | XXXXXXX |         |   ¤     |||    ¤    | 0       |         |         | FLASH   |
+  * |         |         | XXXXXXX |         |   ¤     |||    ¤    | 0       |         |         | FLASH   |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_NUM] = LAYOUT_ortho_4x10( /* NUMPAD */
-    EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
+    ESCAD   , REDO    , KC_PSCR , SFTENT  , KC_UP   ,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
     COMMENT , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
-    CTLK    , TERM    , BOOKMARK, ___XX___, ___XX___,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
-    ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
+    CTLK    , TERM    , BOOKMARK, EXPAND  , KC_DOWN ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
+    ________, ________, ___XX___, KC_BSPC , ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   [_NUM_EN] = LAYOUT_ortho_4x10( /* NUMPAD */
-    EXPAND  , REDO    , KC_PSCR , SFTENT  , ___XX___,    ___XX___, KC_7    , KC_8    , KC_9    , QK_RBT  ,
+    ESCAD   , REDO    , KC_PSCR , SFTENT  , KC_UP   ,    ___XX___, KC_7    , KC_8    , KC_9    , QK_RBT  ,
     COMMENT , NCUT    , NCOPYE  , NPASTE  , SPACE4  ,    ___XX___, KC_4    , KC_5    , KC_6    , KC_DOT  ,
-    CTLK    , TERM    , BOOKMARK, ___XX___, ___XX___,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
-    ___XX___, ___XX___, ________, ___XX___, ___XX___,    KC_LSFT , KC_0    , ___XX___, ___XX___, QK_BOOT
+    CTLK    , TERM    , BOOKMARK, EXPAND  , KC_DOWN ,    ___XX___, KC_1    , KC_2    , KC_3    , KC_COMM ,
+    ________, ________, ___XX___, KC_BSPC , ___XX___,    KC_LSFT , KC_0    , ___XX___, ___XX___, QK_BOOT
   ),
 
   /* SYMBOL LAYER
@@ -442,22 +469,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | SHIFT   | SAVE    | CTLD    | FIND    | REPLACE ||| REFRSH  |    ?    |    .    |    /    | F11     |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | ESCAD   | CLOSTW  | PALETTE | XXXXXXX | RENAME  |||         | SHIFT   | RGUI    | RCTL    | F12     |
+  * | (BROWS) | CLOSTW  | PALETTE | XXXXXXX | RENAME  |||         | SHIFT   | RGUI    | RCTL    | F12     |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_FNTN] = LAYOUT_ortho_4x10( /* FUNCTION */
-    ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
+    ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , APPWIN  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
     KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , FR_QUES , FR_DOT  , FR_SLSH , KC_F11  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
     KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , KC_QUES , KC_DOT  , KC_SLSH , KC_F11  ,
-    ESCAD   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
+
+  /* BROWSER LAYER
+  * .-----------------------------------------------------------------------------------------------------.
+  * |         |         | F6      |         |         |||         |         |         |         |         |
+  * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
+  * |         | PREV    | REFRSH  | NEXT    |         |||         |         |         |         |         |
+  * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
+  * |         |         | F12     |         |         |||         |         |         |         |         |
+  * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
+  * |         |         |         |         |         |||         |         |         |         |         |
+  * '-----------------------------------------------------------------------------------------------------'
+  */
+  [_BROWS] = LAYOUT_ortho_4x10(
+    ___XX___, ___XX___, KC_F6   , ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
+    ___XX___, KC_WBAK , REFRSH  , KC_WFWD , ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
+    ___XX___, ___XX___, KC_F12  , ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
+    ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___
+  ),
+ 
 
   /* LANGUAGE LAYER
   * .-----------------------------------------------------------------------------------------------------.
