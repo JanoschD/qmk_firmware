@@ -58,4 +58,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UNICODE_CYCLE_PERSIST false
 #define TAPPING_TERM 200
 
-#define MK_KINETIC_SPEED
+// #define MK_KINETIC_SPEED
+#define MK_COMBINED

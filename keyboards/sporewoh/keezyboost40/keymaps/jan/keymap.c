@@ -5,7 +5,7 @@
 #include QMK_KEYBOARD_H
 #include "keymap_french.h"
 #include "layer_names.h"
-#include "sendstring_french.h"
+// #include "sendstring_french.h"
 
 bool is_linux = true; // default to linux
 bool is_french = true; // default to french
@@ -75,153 +75,6 @@ bool is_french = true; // default to french
 // 
 #define ________ KC_TRNS
 #define ___XX___ KC_NO
-
-
-
-// Tap Dance Declarations
-void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
-    uint16_t line_comment;
-    uint16_t block_comment;
-
-    if (is_linux) {
-        line_comment = is_french ? COMLIN : COMLINE;
-        block_comment = is_french ? COMBLIN : COMBLINE;
-    } else {
-        line_comment = is_french ? COMWIN : COMWINE;
-        block_comment = is_french ? COMBWIN : COMBWINE;
-    }
-
-    if (state->count == 1) {
-        // On single tap, register the line comment shortcut
-        // register_code16(line_comment);
-        tap_code16(line_comment);
-    } else if (state->count == 2) {
-        // On double tap, register the block comment shortcut
-        // Unregister the line comment first to avoid conflicts
-        // unregister_code16(line_comment);
-        // register_code16(block_comment);
-        tap_code16(block_comment);
-    } else {
-        reset_tap_dance(state);
-    }
-}
-
-// void comment_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
-//     // Unregister all possible comment shortcuts on reset (key up)
-//     unregister_code16(COMLIN);
-//     unregister_code16(COMLINE);
-//     unregister_code16(COMWIN);
-//     unregister_code16(COMWINE);
-//     unregister_code16(COMBLIN);
-//     unregister_code16(COMBLINE);
-//     unregister_code16(COMBWIN);
-//     unregister_code16(COMBWINE);
-// }
-
-void bookmark_tap_dance(tap_dance_state_t *state, void *user_data) {
-  
-  const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
-
-  if (state->count == 1) {
-    if (shifted) {
-      // If Shift is held, go to previous bookmark
-      // register_code16(BKPRV);
-      tap_code16(BKPRV);
-    } else {
-      // Otherwise, go to next bookmark
-      // register_code16(BKNEXT);
-      tap_code16(BKNEXT);
-    }
-  } else if (state->count == 2) {
-    // On double tap, toggle bookmark
-    // unregister_code16(BKPRV);
-    // unregister_code16(BKNEXT);
-    // register_code16(BKTOG);
-    tap_code16(BKTOG);
-  } else {
-    reset_tap_dance(state);
-  }
-
-}
-
-/* void bookmark_tap_dance_reset(tap_dance_state_t *state, void *user_data) {
-  // Unregister all possible bookmark shortcuts on reset (key up)
-  unregister_code16(BKPRV);
-  unregister_code16(BKNEXT);
-  unregister_code16(BKTOG);
-} */
-
-// triple tap: paste -> mouse middle button -> windows paste history
-void paste_tap_dance(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-      tap_code16(PASTE);
-    } else if (state->count == 2) {
-      tap_code16(MMDLBTN);
-    } else if (state->count == 3) {
-      tap_code16(PASTEW);
-    } else {
-      reset_tap_dance(state);
-    }
-}
-
-// https://jayliu50.github.io/qmk-cheatsheet/
-enum {
-    TD1 = 0,
-    TD2,
-    TD3,
-    TD4,
-    TD5,
-    TD6,
-    TD7,
-    TD8,
-    TD9,
-    TD10,
-    TD11,
-    TD12,
-    TD13,
-    TD14
-};
-
-tap_dance_action_t tap_dance_actions[] = {
-    // simple tap dance
-    [TD1]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTA),
-    [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
-    [TD3]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
-    // [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
-    [TD4]  = ACTION_TAP_DANCE_FN(paste_tap_dance),
-    [TD5]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
-    [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
-    [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
-    [TD8]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
-    // english tap dance
-    [TD9]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
-    [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
-    // comment tap dance
-    // [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
-    [TD11] = ACTION_TAP_DANCE_FN(comment_tap_dance),
-    // bookmark tap dance
-    // [TD12] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bookmark_tap_dance, bookmark_tap_dance_reset),
-    [TD12] = ACTION_TAP_DANCE_FN(bookmark_tap_dance),
-    [TD13] = ACTION_TAP_DANCE_DOUBLE(KC_APP, WINEMO),
-};
-
-#define ALTALL   TD(TD1) // alt           -> select all
-#define REFRSH   TD(TD2) // refresh       -> hard refresh
-#define NCTAB    TD(TD3) // new tab       -> close tab
-#define PPASTE   TD(TD4) // ctrl v        -> mouse scroll wheel button
-#define TCTLD    TD(TD5) // ctrl d        -> ctrl alt d
-#define SFTCAP   TD(TD6) // shift         -> all caps
-#define ESCAD    TD(TD7) // esc           -> ctrl alt del
-#define CLOSTW   TD(TD8) // close tab     -> close window
-// english versions
-#define ALTALLE  TD(TD9) // alt          -> select all
-#define NCTABE   TD(TD10) // new tab      -> close tab
-// comment
-#define COMMENT  TD(TD11) // comment line/block
-// bookmark
-#define BOOKMARK TD(TD12) // bookmark next/previous/toggle
-// windows emoji
-#define APPWIN   TD(TD13) // apps -> windows emoji panel
 
 // Unicode characters
 enum unicode_names {
@@ -335,6 +188,172 @@ const uint32_t PROGMEM unicode_map[] = {
 #define K_ZDOT   UP(U_ZDOT_LO, U_ZDOT_HI)
 #define K_ZCARON UP(U_ZCARON_LO, U_ZCARON_HI)
 
+
+// Tap Dance Declarations
+void comment_tap_dance(tap_dance_state_t *state, void *user_data) {
+    uint16_t line_comment;
+    uint16_t block_comment;
+
+    if (is_linux) {
+        line_comment = is_french ? COMLIN : COMLINE;
+        block_comment = is_french ? COMBLIN : COMBLINE;
+    } else {
+        line_comment = is_french ? COMWIN : COMWINE;
+        block_comment = is_french ? COMBWIN : COMBWINE;
+    }
+
+    if (state->count == 1) {
+        // On single tap, register the line comment shortcut
+        tap_code16(line_comment);
+    } else if (state->count == 2) {
+        // On double tap, register the block comment shortcut
+        tap_code16(block_comment);
+    } else {
+        reset_tap_dance(state);
+    }
+}
+
+void bookmark_tap_dance(tap_dance_state_t *state, void *user_data) {
+  
+  const bool shifted = (get_mods() & MOD_MASK_SHIFT) != 0;
+
+  if (state->count == 1) {
+    if (shifted) {
+      // If Shift is held, go to previous bookmark
+      tap_code16(BKPRV);
+    } else {
+      // Otherwise, go to next bookmark
+      tap_code16(BKNEXT);
+    }
+  } else if (state->count == 2) {
+    // On double tap, toggle bookmark
+    tap_code16(BKTOG);
+  } else {
+    reset_tap_dance(state);
+  }
+
+}
+
+// triple tap: paste -> mouse middle button -> windows paste history
+void paste_tap_dance(tap_dance_state_t *state, void *user_data) {
+    if (state->count == 1) {
+      tap_code16(PASTE);
+    } else if (state->count == 2) {
+      tap_code16(MMDLBTN);
+    } else if (state->count == 3) {
+      tap_code16(PASTEW);
+    } else {
+      reset_tap_dance(state);
+    }
+}
+
+// iter number key code
+void iter_tap_dance(tap_dance_state_t *state, void *user_data) {
+  if (state->count == 1) {
+    tap_code16(KC_1);
+  } else if (state->count == 2) {
+      tap_code16(KC_2);
+    } else if (state->count == 3) {
+      tap_code16(KC_3);
+    } else {
+      reset_tap_dance(state);
+    }
+}
+
+void agrave_tap_dance(tap_dance_state_t *state, void *user_data) {
+  if (state->count == 1) {
+    tap_code16(FR_AGRV);
+  } else if (state->count == 2) {
+    // À
+    register_unicode(0x00C0);
+  } else {
+    reset_tap_dance(state);
+  }
+}
+
+void cced_tap_dance(tap_dance_state_t *state, void *user_data) {
+  if (state->count == 1) {
+    tap_code16(FR_CCED);
+  } else if (state->count == 2) {
+    // Ç
+    register_unicode(0x00C7);
+  } else {
+    reset_tap_dance(state);
+  }
+}
+
+// https://jayliu50.github.io/qmk-cheatsheet/
+enum {
+    TD1 = 0,
+    TD2,
+    TD3,
+    TD4,
+    TD5,
+    TD6,
+    TD7,
+    TD8,
+    TD9,
+    TD10,
+    TD11,
+    TD12,
+    TD13,
+    TD14,
+    TD15,
+    TD16
+};
+
+tap_dance_action_t tap_dance_actions[] = {
+    // simple tap dance
+    [TD1]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTA),
+    [TD2]  = ACTION_TAP_DANCE_DOUBLE(KC_F5, HREFRSH),
+    [TD3]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTAB),
+    // [TD4]  = ACTION_TAP_DANCE_DOUBLE(PASTE, MMDLBTN),
+    [TD4]  = ACTION_TAP_DANCE_FN(paste_tap_dance),
+    [TD5]  = ACTION_TAP_DANCE_DOUBLE(CTLD, PRVMAT),
+    [TD6]  = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
+    [TD7]  = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_CAD),
+    [TD8]  = ACTION_TAP_DANCE_DOUBLE(CLOSTAB, CLOSWIN),
+    // english tap dance
+    [TD9]  = ACTION_TAP_DANCE_DOUBLE(KC_LALT, SELECTAE),
+    [TD10]  = ACTION_TAP_DANCE_DOUBLE(NEWTAB, CLSTABE),
+    // comment tap dance
+    // [TD11] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_tap_dance, comment_tap_dance_reset),
+    [TD11] = ACTION_TAP_DANCE_FN(comment_tap_dance),
+    // bookmark tap dance
+    // [TD12] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, bookmark_tap_dance, bookmark_tap_dance_reset),
+    [TD12] = ACTION_TAP_DANCE_FN(bookmark_tap_dance),
+    [TD13] = ACTION_TAP_DANCE_DOUBLE(KC_APP, WINEMO),
+    // iter tap dance
+    [TD14] = ACTION_TAP_DANCE_FN(iter_tap_dance),
+    // french accented characters
+    [TD15] = ACTION_TAP_DANCE_FN(agrave_tap_dance),
+    [TD16] = ACTION_TAP_DANCE_FN(cced_tap_dance),
+};
+
+#define ALTALL   TD(TD1) // alt           -> select all
+#define REFRSH   TD(TD2) // refresh       -> hard refresh
+#define NCTAB    TD(TD3) // new tab       -> close tab
+#define PPASTE   TD(TD4) // ctrl v        -> mouse scroll wheel button
+#define TCTLD    TD(TD5) // ctrl d        -> ctrl alt d
+#define SFTCAP   TD(TD6) // shift         -> all caps
+#define ESCAD    TD(TD7) // esc           -> ctrl alt del
+#define CLOSTW   TD(TD8) // close tab     -> close window
+// english versions
+#define ALTALLE  TD(TD9) // alt          -> select all
+#define NCTABE   TD(TD10) // new tab      -> close tab
+// comment
+#define COMMENT  TD(TD11) // comment line/block
+// bookmark
+#define BOOKMARK TD(TD12) // bookmark next/previous/toggle
+// windows emoji
+#define APPWIN   TD(TD13) // apps -> windows emoji panel
+// iter
+#define ITER     TD(TD14) // increment number key code
+// french accented characters
+#define AGRAVE   TD(TD15) // à
+#define CCED     TD(TD16) // ç
+
+
 // Defines the keycodes used by your macros in process_record_user
 enum custom_keycodes {
   TOG_OS = SAFE_RANGE,
@@ -346,6 +365,7 @@ enum custom_keycodes {
   C_EXLM,
 };
 
+// Layer definitions
 #define SFT      MO(_SFT)
 #define NUM      LT(_NUM, KC_SPC)
 #define SYMSPC   LT(_SYMB, KC_SPC)
@@ -354,6 +374,13 @@ enum custom_keycodes {
 #define LANG     MO(_LANG)
 #define AZRT     MO(_AZ_RT)
 #define BROWS    MO(_BROWS)
+
+// Combo definitions
+const uint16_t PROGMEM fn_sym_shift_combo[] = {FNTNB, SYMSPC, COMBO_END};
+
+combo_t key_combos[] = {
+  COMBO(fn_sym_shift_combo, KC_LSFT),
+};
 
 /*
 TODO:
@@ -396,24 +423,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_AZ_RT] = LAYOUT_ortho_4x10(  /* AZERTY RIGHT HAND */
     KC_P    , KC_O    , KC_I    , KC_U    , KC_Y    ,   ___XX___, MS_BTN1 , MS_UP   , MS_BTN2 , ___XX___,
     FR_M    , KC_L    , KC_K    , KC_J    , KC_H    ,   ___XX___, MS_LEFT , MS_DOWN , MS_RGHT , ___XX___,
-    FR_EXLM , FR_COLN , FR_SCLN , FR_COMM , KC_N    ,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
-    ________, ________, ___XX___, ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___
+    FR_MINS , FR_COLN , FR_DOT  , FR_COMM , KC_N    ,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
+    ________, ________, ___XX___, ___XX___, ___XX___,   MS_ACL0 , MS_ACL1 , MS_ACL2 , ___XX___, ___XX___
   ),
 
   /* NUMPAD
   * .-----------------------------------------------------------------------------------------------------.
-  * | EXPAND  | REDO    |PRINT SCR| SFTENT  |         |||         | 7       | 8       | 9       | REBOOT  |
+  * | ESCAPE  | REDO    |PRINT SCR| SFTENT  | UP      |||         | 7       | 8       | 9       | REBOOT  |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | COMMENT | NCUT    | NCOPY   | NPASTE  | SPACE4  |||         | 4       | 5       | 6       | .       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | CTLK    | TERM    |BOOKMARK | EXPAND  |         |||         | 1       | 2       | 3       | ,       |
+  * | CTLK    | TERM    |BOOKMARK | EXPAND  | DOWN    |||         | 1       | 2       | 3       | ,       |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * |         |         | XXXXXXX |         |   ¤     |||    ¤    | 0       |         |         | FLASH   |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_NUM] = LAYOUT_ortho_4x10( /* NUMPAD */
     ESCAD   , REDO    , KC_PSCR , SFTENT  , KC_UP   ,    ___XX___, FR_7    , FR_8    , FR_9    , QK_RBT  ,
-    COMMENT , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ___XX___, FR_4    , FR_5    , FR_6    , FR_DOT  ,
+    COMMENT , NCUT    , NCOPY   , NPASTE  , SPACE4  ,    ITER    , FR_4    , FR_5    , FR_6    , FR_DOT  ,
     CTLK    , TERM    , BOOKMARK, EXPAND  , KC_DOWN ,    ___XX___, FR_1    , FR_2    , FR_3    , FR_COMM ,
     ________, ________, ___XX___, KC_BSPC , ___XX___,    KC_LSFT , FR_0    , ___XX___, ___XX___, QK_BOOT
   ),
@@ -433,14 +460,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   *| €       | X = *   | C = ^   | #       | /       ||| \       | °       | ^ (dead)| ¨       | @       |
   *|---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  *|    ¤    |    ¤    |         |         |   ¤     |||    ¤    | XXXXXXX |    ¤    |         |         |
+  *| è       |  é      | ç       |         |   ¤     |||    ¤    | XXXXXXX |    ¤    |         | à       |
   *'-----------------------------------------------------------------------------------------------------'
-  */ 
+  */
   [_SYMB] = LAYOUT_ortho_4x10( /* SYMBOL */
     FR_AMPR , FR_TILD , FR_DQUO , FR_QUOT , FR_GRV  ,    FR_MINS , FR_UNDS , FR_PIPE , FR_DLR  , FR_PERC ,
     FR_LABK , FR_LBRC , FR_LCBR , FR_LPRN , FR_EQL  ,    FR_PLUS , FR_RPRN , FR_RCBR , FR_RBRC , FR_RABK ,
     FR_EURO , FR_ASTR , FR_CCIRC, FR_HASH , FR_SLSH ,    FR_BSLS , FR_DEG  , FR_CIRC , FR_DIAE , FR_AT   ,
-    ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,    ___XX___, ________, ___XX___, ___XX___, ___XX___
+    FR_EGRV , FR_EACU , CCED    , ___XX___, ___XX___,    ___XX___, ________, ___XX___, ___XX___, AGRAVE 
   ),
 
   /* SYMBOL ENGLISH LAYER
@@ -455,9 +482,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   *'-----------------------------------------------------------------------------------------------------'
   */ 
   [_SYMB_EN] = LAYOUT_ortho_4x10( /* SYMBOL */
-    KC_AMPR , KC_TILD , KC_DQUO , KC_QUOT , KC_GRV  ,    KC_MINS , KC_UNDS , KC_PIPE , ___XX___, KC_PERC ,
+    KC_AMPR , KC_TILD , KC_DQUO , KC_QUOT , KC_GRV  ,    KC_MINS , KC_UNDS , KC_PIPE , KC_DLR  , KC_PERC ,
     KC_LABK , KC_LBRC , KC_LCBR , KC_LPRN , KC_EQL  ,    KC_PLUS , KC_RPRN , KC_RCBR , KC_RBRC , KC_RABK ,
-    ___XX___, KC_ASTR , KC_CIRC , KC_HASH , KC_SLSH ,    KC_BSLS , KC_DLR  , ___XX___, ___XX___, KC_AT   ,
+    ___XX___, KC_ASTR , KC_CIRC , KC_HASH , KC_SLSH ,    KC_BSLS , ___XX___, ___XX___, ___XX___, KC_AT   ,
     ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,    ___XX___, ________, ___XX___, ___XX___, ___XX___
   ),
 
@@ -476,14 +503,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ALTALL  , UNDO    , KC_DEL  , KC_ENT  , NCTAB   ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , APPWIN  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
     KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , FR_QUES , FR_DOT  , FR_SLSH , KC_F11  ,
-    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    KC_SPC  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   [_FNTN_EN] = LAYOUT_ortho_4x10( /* FUNCTION */
     ALTALLE , UNDOE   , KC_DEL  , KC_ENT  , NCTABE  ,    KC_F6   , KC_HOME , KC_UP   , KC_END  , KC_APP  ,
     KC_LCTL , CUT     , COPY    , PPASTE  , KC_TAB  ,    SELECTW , KC_LEFT , KC_DOWN , KC_RIGHT, KC_BSPC ,
     KC_LSFT , SAVE    , TCTLD   , FIND    , REPLACE ,    REFRSH  , KC_QUES , KC_DOT  , KC_SLSH , KC_F11  ,
-    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    ___XX___, KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
+    BROWS   , CLOSTW  , PALETTE , ________, KC_F2   ,    KC_SPC  , KC_RSFT , KC_RGUI , KC_RCTL , KC_F12
   ),
 
   /* BROWSER LAYER
@@ -503,7 +530,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ___XX___, ___XX___, KC_F12  , ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,
     ___XX___, ___XX___, ___XX___, ___XX___, ___XX___,   ___XX___, ___XX___, ___XX___, ___XX___, ___XX___
   ),
- 
+
 
   /* LANGUAGE LAYER
   * .-----------------------------------------------------------------------------------------------------.
@@ -513,14 +540,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
   * | ś       | ź       | ć       | č       |         ||| ñ       | ň       | ń       |         |         |
   * |---------+---------+---------+---------+---------+++---------+---------+---------+---------+---------|
-  * | à       | é       | ç       | è       | (SFTCAP)||| (SFTCAP)|         | XXXXXXX |         |         |
+  * |         |         |         |         | (SFTCAP)||| (SFTCAP)|         | XXXXXXX |         |         |
   * '-----------------------------------------------------------------------------------------------------'
   */
   [_LANG] = LAYOUT_ortho_4x10( /* LANGUAGE */
     K_AACUTE, K_ZCARON, K_ECARON, K_RCARON, K_TCARON,    K_YACUTE, K_UACUTE, K_IACUTE, K_OACUTE, ___XX___,
     K_SCARON, K_SSHARP, K_DSTROK, ___XX___, ___XX___,    ___XX___, ___XX___, ___XX___, K_LSTROK, ___XX___,
     K_SACUTE, K_ZACUTE, K_CACUTE, K_CCARON, ___XX___,    K_NTILDE, K_NCARON, K_NACUTE, ___XX___, ___XX___,
-    FR_AGRV , FR_EACU , FR_CCED , FR_EGRV , SFTCAP  ,    SFTCAP  , ___XX___, ________, ___XX___, ___XX___
+    ___XX___, ___XX___, ___XX___, ___XX___, SFTCAP  ,    SFTCAP  , ___XX___, ________, ___XX___, ___XX___
   ),
 };
 
